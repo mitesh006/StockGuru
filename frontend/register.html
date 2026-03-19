@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - StockGuru</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <a href="login.html">StockGuru</a>
+                <p>Your intelligent market companion</p>
+            </div>
+
+            <h2 class="auth-title">Create Account</h2>
+            <p class="auth-subtitle">Start tracking stocks, watchlists &amp; your portfolio</p>
+
+            <div id="error-msg" class="error-msg"></div>
+            <div id="success-msg" class="success-msg">✅ Account created! Redirecting to login...</div>
+
+            <form id="register-form">
+                <div class="form-group">
+                    <label class="form-label" for="fullname">Full Name</label>
+                    <input type="text" id="fullname" class="form-input" placeholder="John Doe" required autocomplete="name">
+                    <div class="field-error" id="name-error">Please enter your full name.</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="email">Email Address</label>
+                    <input type="email" id="email" class="form-input" placeholder="you@example.com" required autocomplete="email">
+                    <div class="field-error" id="email-error">Please enter a valid email address.</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="password" class="form-input" placeholder="Min. 8 characters" required autocomplete="new-password">
+                        <button type="button" class="toggle-password" id="toggle-pwd">👁</button>
+                    </div>
+                    <div class="password-strength">
+                        <div class="strength-bar" id="strength-bar"></div>
+                    </div>
+                    <div class="strength-text" id="strength-text"></div>
+                    <div class="field-error" id="password-error">Password must be at least 8 characters.</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="confirm-password">Confirm Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="confirm-password" class="form-input" placeholder="Repeat your password" required autocomplete="new-password">
+                        <button type="button" class="toggle-password" id="toggle-pwd2">👁</button>
+                    </div>
+                    <div class="field-error" id="confirm-error">Passwords do not match.</div>
+                </div>
+
+                <label class="terms-check">
+                    <input type="checkbox" id="terms" required>
+                    I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                </label>
+
+                <button type="submit" class="btn-auth" id="register-btn">Create Account →</button>
+            </form>
+
+            <div class="auth-switch">
+                Already have an account? <a href="login.html">Sign in</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- NSE Ticker Bar -->
+    <div class="ticker-bar">
+        <div class="ticker-track">
+            <div class="ticker-item"><span class="sym">RELIANCE</span><span class="pos">₹2,843.50 ▲ +1.2%</span></div>
+            <div class="ticker-item"><span class="sym">TCS</span><span class="pos">₹3,920.00 ▲ +0.8%</span></div>
+            <div class="ticker-item"><span class="sym">HDFC</span><span class="neg">₹1,658.30 ▼ -0.5%</span></div>
+            <div class="ticker-item"><span class="sym">INFY</span><span class="pos">₹1,482.75 ▲ +1.5%</span></div>
+            <div class="ticker-item"><span class="sym">SBIN</span><span class="neg">₹756.20 ▼ -0.3%</span></div>
+            <div class="ticker-item"><span class="sym">WIPRO</span><span class="pos">₹462.80 ▲ +0.6%</span></div>
+            <div class="ticker-item"><span class="sym">BAJFINANCE</span><span class="neg">₹6,832.50 ▼ -1.1%</span></div>
+            <div class="ticker-item"><span class="sym">HCLTECH</span><span class="pos">₹1,344.00 ▲ +0.9%</span></div>
+            <div class="ticker-item"><span class="sym">RELIANCE</span><span class="pos">₹2,843.50 ▲ +1.2%</span></div>
+            <div class="ticker-item"><span class="sym">TCS</span><span class="pos">₹3,920.00 ▲ +0.8%</span></div>
+            <div class="ticker-item"><span class="sym">HDFC</span><span class="neg">₹1,658.30 ▼ -0.5%</span></div>
+            <div class="ticker-item"><span class="sym">INFY</span><span class="pos">₹1,482.75 ▲ +1.5%</span></div>
+            <div class="ticker-item"><span class="sym">SBIN</span><span class="neg">₹756.20 ▼ -0.3%</span></div>
+            <div class="ticker-item"><span class="sym">WIPRO</span><span class="pos">₹462.80 ▲ +0.6%</span></div>
+            <div class="ticker-item"><span class="sym">BAJFINANCE</span><span class="neg">₹6,832.50 ▼ -1.1%</span></div>
+            <div class="ticker-item"><span class="sym">HCLTECH</span><span class="pos">₹1,344.00 ▲ +0.9%</span></div>
+        </div>
+    </div>
+
+    <script src="js/register.js"></script>
+</body>
+</html>

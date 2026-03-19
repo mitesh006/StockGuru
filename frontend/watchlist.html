@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watchlist - StockGuru</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="dashboard.html" class="logo">StockGuru</a>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="watchlist.html" class="active">Watchlist</a></li>
+
+                <li><a href="about.html">About</a></li>
+                <li id="nav-auth"><a href="login.html">Login</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <div class="page-header">
+            <h1>My Watchlist</h1>
+            <p>Track your favorite stocks in one place</p>
+        </div>
+
+        <!-- Add Stock Section -->
+        <div class="search-section">
+            <div class="search-container">
+                <input type="text" id="add-stock-input" class="search-input"
+                    placeholder="Enter stock symbol to add (e.g., WIPRO, BAJFINANCE)...">
+                <button id="add-stock-btn" class="btn">Add to Watchlist</button>
+            </div>
+        </div>
+
+        <!-- Watchlist Table -->
+        <div class="table-container">
+            <table id="watchlist-table">
+                <thead>
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Company Name</th>
+                        <th>Current Price</th>
+                        <th>Change</th>
+                        <th>Change %</th>
+                        <th>Market Cap</th>
+                        <th>Volume</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="watchlist-tbody">
+                    <tr data-symbol="RELIANCE">
+                        <td class="stock-symbol">RELIANCE</td>
+                        <td>
+                            <div class="stock-name">Reliance Industries</div>
+                        </td>
+                        <td class="price-positive">₹2,843.50</td>
+                        <td class="price-positive">+33.50</td>
+                        <td class="price-positive">+1.19%</td>
+                        <td>₹19.2T</td>
+                        <td>8.4M</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-secondary btn-small view-btn">View</button>
+                                <button class="btn btn-danger btn-small remove-btn">Remove</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr data-symbol="TCS">
+                        <td class="stock-symbol">TCS</td>
+                        <td>
+                            <div class="stock-name">Tata Consultancy Services</div>
+                        </td>
+                        <td class="price-positive">₹3,920.00</td>
+                        <td class="price-positive">+31.20</td>
+                        <td class="price-positive">+0.80%</td>
+                        <td>₹14.2T</td>
+                        <td>3.1M</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-secondary btn-small view-btn">View</button>
+                                <button class="btn btn-danger btn-small remove-btn">Remove</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr data-symbol="HDFC">
+                        <td class="stock-symbol">HDFC</td>
+                        <td>
+                            <div class="stock-name">HDFC Bank Ltd.</div>
+                        </td>
+                        <td class="price-negative">₹1,658.30</td>
+                        <td class="price-negative">-8.70</td>
+                        <td class="price-negative">-0.52%</td>
+                        <td>₹12.5T</td>
+                        <td>6.2M</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-secondary btn-small view-btn">View</button>
+                                <button class="btn btn-danger btn-small remove-btn">Remove</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr data-symbol="INFY">
+                        <td class="stock-symbol">INFY</td>
+                        <td>
+                            <div class="stock-name">Infosys Ltd.</div>
+                        </td>
+                        <td class="price-negative">₹1,482.75</td>
+                        <td class="price-negative">-8.50</td>
+                        <td class="price-negative">-0.57%</td>
+                        <td>₹6.1T</td>
+                        <td>5.8M</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-secondary btn-small view-btn">View</button>
+                                <button class="btn btn-danger btn-small remove-btn">Remove</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr data-symbol="SBIN">
+                        <td class="stock-symbol">SBIN</td>
+                        <td>
+                            <div class="stock-name">State Bank of India</div>
+                        </td>
+                        <td class="price-positive">₹756.20</td>
+                        <td class="price-positive">+4.30</td>
+                        <td class="price-positive">+0.57%</td>
+                        <td>₹6.8T</td>
+                        <td>12.1M</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-secondary btn-small view-btn">View</button>
+                                <button class="btn btn-danger btn-small remove-btn">Remove</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="empty-state" style="display: none;">
+            <div class="empty-state-icon">📊</div>
+            <h3>Your watchlist is empty</h3>
+            <p>Add stocks to start tracking their performance</p>
+        </div>
+    </div>
+
+    <script src="js/nav.js"></script>
+    <script src="js/watchlist.js"></script>
+</body>
+
+</html>
