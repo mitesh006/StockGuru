@@ -5,7 +5,7 @@ A web-based stock market analyzer that provides real-time stock data visualizati
 
 ## Team Members
 - Mitesh - Full Stack Developer
-- Harshit - Backend & Database Developer
+- Harshit - Frontend Developer
 - Neem - AI/ML Developer
 
 ## Technologies Used
