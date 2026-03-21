@@ -3,19 +3,24 @@
  * Included on every page that has a nav with id="nav-auth"
  */
 (function () {
-    const token = localStorage.getItem('token');
-    const navAuth = document.getElementById('nav-auth');
+    const token   = localStorage.getItem("token");
+    const navAuth = document.getElementById("nav-auth");
     if (!navAuth) return;
 
     if (token) {
-        navAuth.innerHTML = '<a href="#" id="logout-link">Logout</a>';
-        document.getElementById('logout-link').addEventListener('click', function (e) {
+        // Replace the single <li> with two proper sibling <li> elements
+        navAuth.outerHTML = `
+            <li><a href="profile.html">Profile</a></li>
+            <li><a href="#" id="logout-link">Logout</a></li>
+        `;
+        document.getElementById("logout-link").addEventListener("click", function (e) {
             e.preventDefault();
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = 'login.html';
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            window.location.href = "login.html";
         });
     } else {
-        navAuth.innerHTML = '<a href="login.html">Login</a>';
+        // Guest: show Login link (navAuth is already a <li>)
+        navAuth.innerHTML = `<a href="login.html">Login</a>`;
     }
 })();

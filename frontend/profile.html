@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - StockGuru</title>
+    <meta name="description" content="Your StockGuru user profile — account info and settings.">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/auth.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="dashboard.html" class="logo">StockGuru</a>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="watchlist.html">Watchlist</a></li>
+                <li><a href="about.html">About</a></li>
+                <li id="nav-auth"><a href="login.html">Login</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="profile-wrapper" id="profile-wrapper">
+            <!-- Loading state -->
+            <div class="profile-loading" id="profile-loading">
+                <div class="profile-spinner"></div>
+                <div>Loading profile…</div>
+            </div>
+
+            <!-- Profile card (filled by JS) -->
+            <div class="profile-card" id="profile-card" style="display:none;">
+                <div class="profile-header">
+                    <div class="profile-avatar" id="profile-avatar">?</div>
+                    <div>
+                        <div class="profile-name"  id="profile-name">—</div>
+                        <div class="profile-email" id="profile-email">—</div>
+                        <div class="profile-badge" id="profile-badge">Logged In</div>
+                    </div>
+                </div>
+
+                <div class="profile-details">
+                    <div class="profile-row">
+                        <span class="profile-key">Full Name</span>
+                        <span class="profile-val" id="pd-name">—</span>
+                    </div>
+                    <div class="profile-row">
+                        <span class="profile-key">Email</span>
+                        <span class="profile-val" id="pd-email">—</span>
+                    </div>
+                    <div class="profile-row">
+                        <span class="profile-key">Member Since</span>
+                        <span class="profile-val" id="pd-since">—</span>
+                    </div>
+                    <div class="profile-row">
+                        <span class="profile-key">Account Status</span>
+                        <span class="profile-val green">Active</span>
+                    </div>
+                </div>
+
+                <button class="btn-logout-profile" id="logout-profile-btn">
+                    🚪 Sign Out
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/nav.js"></script>
+    <script src="js/profile.js"></script>
+</body>
+
+</html>

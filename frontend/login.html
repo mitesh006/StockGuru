@@ -3,78 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - StockGuru</title>
+    <title>Sign In - StockGuru</title>
+    <meta name="description" content="Sign in to StockGuru and access your portfolio and watchlist.">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/auth.css">
 </head>
-<body>
+<body class="auth-page">
 
-    <div class="auth-wrapper">
-        <div class="auth-card">
-            <div class="auth-logo">
-                <a href="login.html">StockGuru</a>
-                <p>Your intelligent market companion</p>
-            </div>
+    <div class="auth-layout">
 
-            <h2 class="auth-title">Welcome Back</h2>
-            <p class="auth-subtitle">Sign in to access your portfolio &amp; watchlist</p>
-
-            <div id="error-msg" class="error-msg">
-                ⚠ Invalid email or password. Please try again.
-            </div>
-
-            <form id="login-form">
-                <div class="form-group">
-                    <label class="form-label" for="email">Email Address</label>
-                    <input type="email" id="email" class="form-input" placeholder="you@example.com" required autocomplete="email">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="password">Password</label>
-                    <div class="password-wrapper">
-                        <input type="password" id="password" class="form-input" placeholder="Enter your password" required autocomplete="current-password">
-                        <button type="button" class="toggle-password" id="toggle-pwd">👁</button>
+        <!-- Left Panel: Branding -->
+        <div class="auth-panel-left">
+            <div class="auth-panel-inner">
+                <a href="dashboard.html" class="auth-brand">StockGuru</a>
+                <p class="auth-brand-sub">Your intelligent market companion</p>
+                <div class="auth-features">
+                    <div class="auth-feature-item">
+                        <span class="auth-feature-dot"></span>
+                        Real-time stock prices &amp; charts
+                    </div>
+                    <div class="auth-feature-item">
+                        <span class="auth-feature-dot"></span>
+                        Detailed fundamental analysis
+                    </div>
+                    <div class="auth-feature-item">
+                        <span class="auth-feature-dot"></span>
+                        Personal watchlist &amp; portfolio
                     </div>
                 </div>
-
-                <div class="form-options">
-                    <label class="remember-me">
-                        <input type="checkbox" id="remember-me"> Remember me
-                    </label>
-                    <a href="#" class="forgot-link">Forgot password?</a>
-                </div>
-
-                <button type="submit" class="btn-auth" id="login-btn">Sign In →</button>
-            </form>
-
-            <div class="auth-divider">or</div>
-
-            <div class="auth-switch">
-                Don't have an account? <a href="register.html">Create one free</a>
             </div>
         </div>
-    </div>
 
-    <!-- NSE Ticker Bar -->
-    <div class="ticker-bar">
-        <div class="ticker-track">
-            <div class="ticker-item"><span class="sym">RELIANCE</span><span class="pos">₹2,843.50 ▲ +1.2%</span></div>
-            <div class="ticker-item"><span class="sym">TCS</span><span class="pos">₹3,920.00 ▲ +0.8%</span></div>
-            <div class="ticker-item"><span class="sym">HDFC</span><span class="neg">₹1,658.30 ▼ -0.5%</span></div>
-            <div class="ticker-item"><span class="sym">INFY</span><span class="pos">₹1,482.75 ▲ +1.5%</span></div>
-            <div class="ticker-item"><span class="sym">SBIN</span><span class="neg">₹756.20 ▼ -0.3%</span></div>
-            <div class="ticker-item"><span class="sym">WIPRO</span><span class="pos">₹462.80 ▲ +0.6%</span></div>
-            <div class="ticker-item"><span class="sym">BAJFINANCE</span><span class="neg">₹6,832.50 ▼ -1.1%</span></div>
-            <div class="ticker-item"><span class="sym">HCLTECH</span><span class="pos">₹1,344.00 ▲ +0.9%</span></div>
-            <div class="ticker-item"><span class="sym">RELIANCE</span><span class="pos">₹2,843.50 ▲ +1.2%</span></div>
-            <div class="ticker-item"><span class="sym">TCS</span><span class="pos">₹3,920.00 ▲ +0.8%</span></div>
-            <div class="ticker-item"><span class="sym">HDFC</span><span class="neg">₹1,658.30 ▼ -0.5%</span></div>
-            <div class="ticker-item"><span class="sym">INFY</span><span class="pos">₹1,482.75 ▲ +1.5%</span></div>
-            <div class="ticker-item"><span class="sym">SBIN</span><span class="neg">₹756.20 ▼ -0.3%</span></div>
-            <div class="ticker-item"><span class="sym">WIPRO</span><span class="pos">₹462.80 ▲ +0.6%</span></div>
-            <div class="ticker-item"><span class="sym">BAJFINANCE</span><span class="neg">₹6,832.50 ▼ -1.1%</span></div>
-            <div class="ticker-item"><span class="sym">HCLTECH</span><span class="pos">₹1,344.00 ▲ +0.9%</span></div>
+        <!-- Right Panel: Form -->
+        <div class="auth-panel-right">
+            <div class="auth-card">
+
+                <div class="auth-card-header">
+                    <h2 class="auth-title">Welcome Back</h2>
+                    <p class="auth-subtitle">Sign in to access your account</p>
+                </div>
+
+                <div id="error-msg" class="error-msg"></div>
+
+                <form id="login-form" novalidate>
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email Address</label>
+                        <input type="email" id="email" class="form-input"
+                            placeholder="you@example.com" required autocomplete="email">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="password">Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="password" class="form-input"
+                                placeholder="Enter your password" required autocomplete="current-password">
+                            <button type="button" class="toggle-password" id="toggle-pwd"
+                                aria-label="Toggle password visibility">
+                                <span class="eye-icon" id="eye-icon"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-options">
+                        <label class="remember-me">
+                            <input type="checkbox" id="remember-me"> Remember me
+                        </label>
+                        <a href="#" class="forgot-link">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="btn-auth" id="login-btn">Sign In</button>
+                </form>
+
+                <div class="auth-divider"><span>or</span></div>
+
+                <a href="dashboard.html" class="btn-guest">Continue as Guest</a>
+
+                <div class="auth-switch">
+                    Don't have an account? <a href="register.html">Create one free</a>
+                </div>
+
+            </div>
         </div>
+
     </div>
 
     <script src="js/login.js"></script>
