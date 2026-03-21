@@ -1,84 +1,51 @@
-// watchlist.js — Watchlist page logic
+// watchlist.js — Watchlist page with auth guard
 
-const addStockInput = document.getElementById('add-stock-input');
-const addStockBtn   = document.getElementById('add-stock-btn');
-const watchlistTbody = document.getElementById('watchlist-tbody');
-const emptyState    = document.getElementById('empty-state');
+const token = localStorage.getItem("token");
+const gate    = document.getElementById("auth-gate");
+const content = document.getElementById("watchlist-content");
 
-// Add Stock to Watchlist
-addStockBtn.addEventListener('click', function () {
-    const symbol = addStockInput.value.trim().toUpperCase();
-    if (!symbol) { alert('Please enter a stock symbol'); return; }
-
-    const existingStock = document.querySelector(`tr[data-symbol="${symbol}"]`);
-    if (existingStock) {
-        alert(`${symbol} is already in your watchlist!`);
-        addStockInput.value = '';
-        return;
-    }
-
-    // TODO: fetch stock data from API, then add to table
-    console.log('Adding stock to watchlist:', symbol);
-    alert(`Adding ${symbol} to watchlist...\n\nConnect to NSE/stock API to fetch real-time data.`);
-    addStockInput.value = '';
-    updateEmptyState();
-});
-
-addStockInput.addEventListener('keypress', function (e) {
-    if (e.key === 'Enter') addStockBtn.click();
-});
-
-// View Stock Details
-function viewStock(symbol) {
-    window.location.href = `stock.html?symbol=${symbol}`;
+// ─── Auth Guard ───
+// Guest → show login gate, Logged-in → show content
+if (!token) {
+    gate.style.display    = "flex";
+    content.style.display = "none";
+} else {
+    gate.style.display    = "none";
+    content.style.display = "block";
+    initWatchlist();
 }
 
-// Remove Stock from Watchlist
-function removeStock(row, symbol) {
-    if (confirm(`Remove ${symbol} from your watchlist?`)) {
-        row.style.animation = 'fadeOut 0.3s ease-out';
-        setTimeout(() => {
-            row.remove();
-            updateEmptyState();
-            // TODO: DELETE /api/watchlist/:symbol with token
-        }, 300);
+// ─── Watchlist Init (logged-in only) ───
+function initWatchlist() {
+    // This is where watchlist data would be fetched.
+    // Persistence is under development — no backend calls yet.
+    const addBtn   = document.getElementById("add-stock-btn");
+    const addInput = document.getElementById("add-stock-input");
+
+    if (addBtn) {
+        addBtn.addEventListener("click", function () {
+            showWatchlistToast("🔧 Watchlist saving is coming soon — under development.");
+            if (addInput) addInput.value = "";
+        });
+    }
+
+    // Pressing Enter in the input
+    if (addInput) {
+        addInput.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") addBtn.click();
+        });
     }
 }
 
-// Update Empty State Visibility
-function updateEmptyState() {
-    const rows = watchlistTbody.querySelectorAll('tr');
-    if (rows.length === 0) {
-        document.querySelector('.table-container').style.display = 'none';
-        emptyState.style.display = 'block';
-    } else {
-        document.querySelector('.table-container').style.display = 'block';
-        emptyState.style.display = 'none';
+function showWatchlistToast(msg) {
+    let toast = document.getElementById("wl-toast");
+    if (!toast) {
+        toast = document.createElement("div");
+        toast.id = "wl-toast";
+        toast.className = "wl-toast";
+        document.body.appendChild(toast);
     }
+    toast.textContent = msg;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 3500);
 }
-
-// Event Delegation for Buttons
-watchlistTbody.addEventListener('click', function (e) {
-    if (e.target.classList.contains('view-btn')) {
-        const row = e.target.closest('tr');
-        viewStock(row.getAttribute('data-symbol'));
-    }
-    if (e.target.classList.contains('remove-btn')) {
-        const row = e.target.closest('tr');
-        removeStock(row, row.getAttribute('data-symbol'));
-    }
-});
-
-// FadeOut animation
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes fadeOut {
-        from { opacity: 1; transform: translateX(0); }
-        to   { opacity: 0; transform: translateX(-20px); }
-    }
-`;
-document.head.appendChild(style);
-
-// Initialize
-updateEmptyState();
-console.log('StockGuru Watchlist loaded!');

@@ -1,61 +1,67 @@
-// login.js — Login page logic
+// login.js — Connects login form to StockGuru backend auth API
 
-const loginForm   = document.getElementById('login-form');
-const errorMsg    = document.getElementById('error-msg');
-const togglePwd   = document.getElementById('toggle-pwd');
-const passwordInput = document.getElementById('password');
+const API_BASE = "http://localhost:3000/api";
 
-// Redirect if already logged in
-if (localStorage.getItem('token')) {
-    window.location.href = 'dashboard.html';
-}
+const form     = document.getElementById("login-form");
+const errorEl  = document.getElementById("error-msg");
+const loginBtn = document.getElementById("login-btn");
 
 // Toggle password visibility
-togglePwd.addEventListener('click', () => {
-    const isText = passwordInput.type === 'text';
-    passwordInput.type = isText ? 'password' : 'text';
-    togglePwd.textContent = isText ? '👁' : '🙈';
+document.getElementById("toggle-pwd").addEventListener("click", function () {
+    const pwd = document.getElementById("password");
+    const icon = document.getElementById("eye-icon");
+    pwd.type = pwd.type === "password" ? "text" : "password";
+    if (icon) icon.classList.toggle("hidden", pwd.type === "text");
 });
 
-// Form submission
-loginForm.addEventListener('submit', async (e) => {
+// If already logged in, skip to dashboard
+if (localStorage.getItem("token")) {
+    window.location.href = "dashboard.html";
+}
+
+// Helper to show/hide error
+function showError(msg) {
+    errorEl.textContent = msg;
+    errorEl.style.display = "block";
+}
+function hideError() {
+    errorEl.style.display = "none";
+}
+
+form.addEventListener("submit", async function (e) {
     e.preventDefault();
+    hideError();
 
-    const email    = document.getElementById('email').value.trim();
-    const password = passwordInput.value;
-    const btn      = document.getElementById('login-btn');
+    const email    = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
 
-    btn.textContent = 'Signing in...';
-    btn.disabled    = true;
-    errorMsg.style.display = 'none';
+    loginBtn.textContent = "Signing In...";
+    loginBtn.disabled = true;
 
     try {
-        const response = await fetch('http://localhost:5000/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password }),
+        const res  = await fetch(`${API_BASE}/auth/login`, {
+            method:  "POST",
+            headers: { "Content-Type": "application/json" },
+            body:    JSON.stringify({ email, password }),
         });
+        const data = await res.json();
 
-        const data = await response.json();
-
-        if (response.ok) {
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
-            window.location.href = 'dashboard.html';
-        } else {
-            errorMsg.textContent   = '⚠ ' + (data.message || 'Invalid email or password.');
-            errorMsg.style.display = 'block';
+        if (!data.success) {
+            showError(data.message || "Login failed.");
+            return;
         }
-    } catch (err) {
-        errorMsg.textContent   = '⚠ Cannot connect to server. Running in demo mode.';
-        errorMsg.style.display = 'block';
-    } finally {
-        btn.textContent = 'Sign In →';
-        btn.disabled    = false;
-    }
-});
 
-// Clear error on input
-document.querySelectorAll('.form-input').forEach(input => {
-    input.addEventListener('input', () => { errorMsg.style.display = 'none'; });
+        // Store token and user in localStorage
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user",  JSON.stringify(data.user));
+
+        // Redirect to dashboard
+        window.location.href = "dashboard.html";
+
+    } catch (err) {
+        showError("Cannot connect to server. Make sure the backend is running.");
+    } finally {
+        loginBtn.textContent = "Sign In";
+        loginBtn.disabled = false;
+    }
 });
