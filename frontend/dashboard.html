@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - StockGuru</title>
+    <meta name="description" content="Real-time stock market dashboard with live prices, indices, and trending stocks.">
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/dashboard.css">
 </head>
 
 <body>
@@ -22,96 +24,57 @@
         </div>
     </nav>
 
-    <!-- Main Container -->
+    <!-- ═══ TICKER BAR ═══ -->
+    <div class="ticker-bar" id="ticker-bar">
+        <div class="ticker-track" id="ticker-track">
+            <div class="ticker-loading">Loading market data…</div>
+        </div>
+    </div>
+
     <div class="container">
-        <!-- Page Header -->
-        <div class="page-header">
-            <h1>Market Dashboard</h1>
-            <p>Real-time stock analysis and market insights</p>
-        </div>
 
-        <!-- Search Section -->
-        <div class="search-section">
-            <div class="search-container">
-                <input type="text" id="stock-search-input" class="search-input"
-                    placeholder="Search stocks by symbol or company name (e.g., RELIANCE, TCS)...">
-                <button id="search-btn" class="btn">Search</button>
+        <!-- ═══ HERO / SEARCH ═══ -->
+        <div class="dash-hero">
+            <div class="page-header">
+                <h1>Market Dashboard</h1>
+                <p>Real-time stock analysis and market insights</p>
             </div>
-        </div>
-
-        <!-- Stock Cards Grid -->
-        <div id="stock-cards-container" class="cards-grid">
-            <!-- Card 1 -->
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title" id="card-name-1">Reliance Industries</div>
-                        <div class="card-symbol" id="card-symbol-1">RELIANCE</div>
-                    </div>
-                </div>
-                <div class="card-price" id="card-price-1">₹2,843.50</div>
-                <span class="card-change positive" id="card-change-1">+33.50 (+1.19%)</span>
-                <div class="card-info">
-                    <div class="info-item"><span class="info-label">Market Cap</span><span class="info-value"
-                            id="card-marketcap-1">₹19.2T</span></div>
-                    <div class="info-item"><span class="info-label">Volume</span><span class="info-value"
-                            id="card-volume-1">8.4M</span></div>
-                    <div class="info-item"><span class="info-label">P/E Ratio</span><span class="info-value"
-                            id="card-pe-1">22.4</span></div>
-                    <div class="info-item"><span class="info-label">52W High</span><span class="info-value"
-                            id="card-high-1">₹3,025</span></div>
-                </div>
-            </div>
-
-            <!-- Card 2 -->
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title" id="card-name-2">Tata Consultancy</div>
-                        <div class="card-symbol" id="card-symbol-2">TCS</div>
-                    </div>
-                </div>
-                <div class="card-price" id="card-price-2">₹3,920.00</div>
-                <span class="card-change positive" id="card-change-2">+31.20 (+0.80%)</span>
-                <div class="card-info">
-                    <div class="info-item"><span class="info-label">Market Cap</span><span class="info-value"
-                            id="card-marketcap-2">₹14.2T</span></div>
-                    <div class="info-item"><span class="info-label">Volume</span><span class="info-value"
-                            id="card-volume-2">3.1M</span></div>
-                    <div class="info-item"><span class="info-label">P/E Ratio</span><span class="info-value"
-                            id="card-pe-2">28.6</span></div>
-                    <div class="info-item"><span class="info-label">52W High</span><span class="info-value"
-                            id="card-high-2">₹4,255</span></div>
-                </div>
-            </div>
-
-            <!-- Card 3 -->
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title" id="card-name-3">Infosys Ltd.</div>
-                        <div class="card-symbol" id="card-symbol-3">INFY</div>
-                    </div>
-                </div>
-                <div class="card-price" id="card-price-3">₹1,482.75</div>
-                <span class="card-change negative" id="card-change-3">-8.50 (-0.57%)</span>
-                <div class="card-info">
-                    <div class="info-item"><span class="info-label">Market Cap</span><span class="info-value"
-                            id="card-marketcap-3">₹6.1T</span></div>
-                    <div class="info-item"><span class="info-label">Volume</span><span class="info-value"
-                            id="card-volume-3">5.8M</span></div>
-                    <div class="info-item"><span class="info-label">P/E Ratio</span><span class="info-value"
-                            id="card-pe-3">24.1</span></div>
-                    <div class="info-item"><span class="info-label">52W High</span><span class="info-value"
-                            id="card-high-3">₹1,903</span></div>
+            <div class="search-section">
+                <div class="search-container" id="search-wrapper">
+                    <input type="text" id="stock-search-input" class="search-input"
+                        placeholder="Search by symbol or company (e.g., AAPL, Tesla)…">
+                    <button id="search-btn" class="btn">Search</button>
                 </div>
             </div>
         </div>
 
-        <!-- Chart Section -->
+        <!-- ═══ MARKET OVERVIEW ═══ -->
+        <div class="dash-section" id="overview-section">
+            <div class="dash-section-title">Market Overview</div>
+            <div class="overview-grid" id="overview-grid">
+                <div class="overview-skeleton"></div>
+                <div class="overview-skeleton"></div>
+                <div class="overview-skeleton"></div>
+            </div>
+        </div>
+
+        <!-- ═══ TRENDING STOCKS ═══ -->
+        <div class="dash-section" id="trending-section">
+            <div class="dash-section-title">Trending Stocks</div>
+            <div class="trending-grid" id="trending-grid">
+                <div class="trending-skeleton"></div>
+                <div class="trending-skeleton"></div>
+                <div class="trending-skeleton"></div>
+                <div class="trending-skeleton"></div>
+                <div class="trending-skeleton"></div>
+                <div class="trending-skeleton"></div>
+            </div>
+        </div>
+
+        <!-- ═══ CHART SECTION ═══ -->
         <div class="chart-section">
             <div class="chart-header">
-                <h2 class="chart-title" id="chart-stock-title">RELIANCE - Reliance Industries</h2>
+                <h2 class="chart-title" id="chart-stock-title">AAPL — Apple Inc.</h2>
                 <div class="chart-controls">
                     <button class="active" data-period="1D">1D</button>
                     <button data-period="1W">1W</button>
@@ -122,11 +85,13 @@
                 </div>
             </div>
             <div id="stock-chart" class="chart-placeholder">
-                📈 Chart data will be rendered here
-                <br>
-                <span style="font-size: 0.9rem; opacity: 0.7;">Integrate Chart.js with NSE API data</span>
+                <div class="chart-placeholder-inner">
+                    <div style="font-size:3rem;opacity:0.2;"></div>
+                    <div style="opacity:0.45;margin-top:0.5rem;">Connect a charting library to display live price data</div>
+                </div>
             </div>
         </div>
+
     </div>
 
     <script src="js/nav.js"></script>

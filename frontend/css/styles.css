@@ -768,3 +768,70 @@ tbody td {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--accent-green);
 }
+
+/* ─── Search Dropdown ─── */
+.search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.3s ease, opacity 0.2s ease;
+  z-index: 200;
+  box-shadow: var(--shadow-lg);
+}
+
+.search-dropdown.visible {
+  max-height: 350px;
+  opacity: 1;
+  overflow-y: auto;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 1.5rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:hover {
+  background: rgba(0, 255, 136, 0.08);
+}
+
+.dropdown-symbol {
+  font-weight: bold;
+  color: var(--accent-blue);
+  font-size: 1rem;
+  min-width: 100px;
+  letter-spacing: 1px;
+}
+
+.dropdown-name {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.dropdown-loading,
+.dropdown-empty {
+  padding: 1.2rem 1.5rem;
+  color: var(--text-dim);
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.dropdown-loading {
+  animation: pulse 1.5s ease-in-out infinite;
+}
