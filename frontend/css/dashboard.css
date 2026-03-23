@@ -289,13 +289,9 @@
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: 12px;
-    padding: 1.3rem 1rem;
-    text-align: center;
-    cursor: pointer;
-    text-decoration: none;
+    padding: 0.8rem 1.3rem;
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: 0.4rem;
     transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
 }
@@ -303,6 +299,15 @@
     border-color: var(--accent-green);
     transform: translateY(-4px);
     box-shadow: 0 6px 20px rgba(0,255,136,0.08);
+}
+
+.trending-view {
+    color: var(--accent-green);
+    cursor: pointer;
+    font-size: 0.rem;
+    font-weight: bold;
+    align-self: end;
+    padding: 0 0.5rem;
 }
 
 .trending-symbol {

@@ -124,7 +124,9 @@ async function loadMarketOverview() {
         renderOverview(data.data);
     } catch {
         document.getElementById("overview-grid").innerHTML =
-            `<div class="section-error">Market overview unavailable</div>`;
+            `<div class="section-error">Market overview unavailable</div>
+            <div class="section-error">Market overview unavailable</div>
+            <div class="section-error">Market overview unavailable</div>`;
     }
 }
 
@@ -155,7 +157,12 @@ async function loadTrending() {
         renderTrending(data.data);
     } catch {
         document.getElementById("trending-grid").innerHTML =
-            `<div class="section-error">Trending data unavailable</div>`;
+            `<div class="section-error">Trending data unavailable</div>
+            <div class="section-error">Trending data unavailable</div>
+            <div class="section-error">Trending data unavailable</div>
+            <div class="section-error">Trending data unavailable</div>
+            <div class="section-error">Trending data unavailable</div>
+            <div class="section-error">Trending data unavailable</div>`;
     }
 }
 
@@ -166,11 +173,12 @@ function renderTrending(stocks) {
         const cls = up ? "pos" : "neg";
         const arrow = up ? "▲" : "▼";
         return `
-            <a class="trending-card" href="stock.html?symbol=${s.symbol}">
+            <div class="trending-card">
                 <div class="trending-symbol">${s.symbol}</div>
                 <div class="trending-price">$${s.price.toFixed(2)}</div>
                 <div class="trending-change ${cls}">${arrow} ${s.changePercent >= 0 ? "+" : ""}${s.changePercent.toFixed(2)}%</div>
-            </a>`;
+                <a class="trending-view" href="stock.html?symbol=${s.symbol}">View</a>
+            </div>`;
     }).join("");
 }
 
@@ -188,6 +196,6 @@ document.querySelectorAll(".chart-controls button").forEach(btn => {
 // ═══════════════════════════════
 // BOOT
 // ═══════════════════════════════
-loadTicker();
-loadMarketOverview();
-loadTrending();
+// loadTicker();
+// loadMarketOverview();
+// loadTrending();
