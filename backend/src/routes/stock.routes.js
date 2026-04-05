@@ -1,6 +1,6 @@
 const express = require("express");
 const { searchStocks } = require("../controllers/search.controller");
-const { getStockDetails } = require("../controllers/stock.controller");
+const { getStockDetails, getChartData } = require("../controllers/stock.controller");
 const { getTickerData, getMarketOverview, getTrendingStocks } = require("../controllers/dashboard.controller");
 
 const router = express.Router();
@@ -12,6 +12,9 @@ router.get("/search", searchStocks);
 router.get("/ticker",   getTickerData);
 router.get("/overview", getMarketOverview);
 router.get("/trending", getTrendingStocks);
+
+// GET /api/stocks/:symbol/candles — fetch historical chart data
+router.get("/:symbol/candles", getChartData);
 
 // GET /api/stocks/:symbol  — fetch stock details via Finnhub
 router.get("/:symbol", getStockDetails);

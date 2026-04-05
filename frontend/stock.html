@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,8 +7,8 @@
     <meta name="description" content="Real-time stock data, company profile, and financial metrics powered by Finnhub.">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/stock.css">
+    <link rel="icon" href="favicon.ico">
 </head>
-
 <body>
     <!-- Navigation -->
     <nav>
@@ -23,15 +22,12 @@
             </ul>
         </div>
     </nav>
-
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loading-overlay">
         <div class="spinner"></div>
         <div class="loading-text">Fetching stock data…</div>
     </div>
-
     <div class="container">
-
         <!-- ═══ 1. HERO CARD ═══ -->
         <div class="stock-hero" id="stock-hero">
             <div class="hero-top">
@@ -60,28 +56,32 @@
                 </button>
             </div>
         </div>
-
         <!-- ═══ 2. CHART SECTION ═══ -->
         <div class="chart-section" id="chart-section">
             <div class="chart-header">
                 <h2 class="chart-title" id="chart-title">Price Chart</h2>
                 <div class="chart-controls" id="chart-controls">
-                    <button class="active" data-period="1D">1D</button>
                     <button data-period="1W">1W</button>
-                    <button data-period="1M">1M</button>
+                    <button class="active" data-period="1M">1M</button>
+                    <button data-period="6M">6M</button>
                     <button data-period="1Y">1Y</button>
-                    <button data-period="MAX">MAX</button>
                 </div>
             </div>
             <div class="chart-area" id="stock-chart">
-                <div class="chart-placeholder-inner">
-                    <div class="chart-placeholder-icon"></div>
-                    <div class="chart-placeholder-text">Chart will render here</div>
-                    <div class="chart-placeholder-sub">Connect a charting library to display price history</div>
+                <!-- Canvas for Chart.js -->
+                <canvas id="priceChart"></canvas>
+                
+                <!-- Fallback/Loading states -->
+                <div class="chart-loader" id="chart-loader" style="display: none;">
+                    <div class="spinner-small"></div>
+                    <div>Loading historical data...</div>
+                </div>
+                <div class="chart-error" id="chart-error" style="display: none;">
+                    <div class="error-icon">!</div>
+                    <div id="chart-error-msg">No data available for this period.</div>
                 </div>
             </div>
         </div>
-
         <!-- ═══ 3. COMPACT STATS ROW ═══ -->
         <div class="stats-row" id="stats-row">
             <div class="stat-card-compact">
@@ -105,7 +105,6 @@
                 <div class="stat-value" id="stat-volume">—</div>
             </div>
         </div>
-
         <!-- ═══ 4. KEY STATISTICS ═══ -->
         <div class="key-stats-section" id="key-stats-section">
             <div class="section-heading">Key Statistics</div>
@@ -129,7 +128,6 @@
                 </div>
             </div>
         </div>
-
         <!-- ═══ 5. DETAILED FUNDAMENTALS ═══ -->
         <div class="fundamentals-section" id="fundamentals-section">
             <div class="section-heading">Detailed Fundamentals</div>
@@ -137,27 +135,21 @@
                 <button class="fund-tab active" data-tab="annual">Yearly</button>
                 <button class="fund-tab" data-tab="quarterly">Quarterly</button>
             </div>
-
             <div class="fund-panel active" id="panel-annual">
                 <div class="fund-cards" id="annual-cards"></div>
             </div>
-
             <div class="fund-panel" id="panel-quarterly">
                 <div class="fund-cards" id="quarterly-cards"></div>
             </div>
-
             <div class="fund-empty" id="fund-empty" style="display:none;">
                 <div class="fund-empty-icon"></div>
                 <div>Data not available for this stock.</div>
             </div>
         </div>
-
     </div>
-
     <div class="toast" id="toast"></div>
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/nav.js"></script>
     <script src="js/stock.js"></script>
 </body>
-
 </html>
