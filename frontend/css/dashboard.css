@@ -107,7 +107,12 @@
     letter-spacing: 1px;
 }
 
-.search-section { display: flex; justify-content: center; }
+.search-section { 
+    display: flex;
+    justify-content: center;
+    position: relative;
+    z-index: 100;
+}
 
 .search-container {
     display: flex;
