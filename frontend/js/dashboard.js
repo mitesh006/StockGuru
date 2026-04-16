@@ -124,6 +124,15 @@ function renderTicker(stocks) {
     // Duplicate for infinite scroll
     track.innerHTML = html + html;
 
+    requestAnimationFrame(() => {
+        const trackWidth = track.scrollWidth;
+        const screenWidth = window.innerWidth;
+
+        if (trackWidth < screenWidth * 2) {
+            track.innerHTML += html;
+        }
+    });
+
     // Pause on hover
     track.addEventListener("mouseenter", () => track.style.animationPlayState = "paused");
     track.addEventListener("mouseleave", () => track.style.animationPlayState = "running");
