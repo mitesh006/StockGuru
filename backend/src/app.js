@@ -2,9 +2,10 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 
-const stockRoutes     = require("./routes/stock.routes");
-const authRoutes      = require("./routes/auth.routes");
-const watchlistRoutes = require("./routes/watchlist.routes");
+const stockRoutes      = require("./routes/stock.routes");
+const authRoutes       = require("./routes/auth.routes");
+const watchlistRoutes  = require("./routes/watchlist.routes");
+const predictionRoutes = require("./routes/prediction.routes");
 
 const app = express();
 
@@ -26,6 +27,7 @@ connectDB();
 // ─── Routes ───
 app.get("/", (req, res) => res.send("StockGuru API is running..."));
 app.use("/api/auth",      authRoutes);
+app.use("/api/stocks",    predictionRoutes);   // must be before stockRoutes (/:symbol catch-all)
 app.use("/api/stocks",    stockRoutes);
 app.use("/api/watchlist", watchlistRoutes);
 
