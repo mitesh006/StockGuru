@@ -18,7 +18,6 @@ const CHART_CLIENT_TTL = 5 * 60 * 1000; // 5 min
 let fetchingDetails = false;           // Guard against duplicate detail fetches
 let chartAbort      = null;            // AbortController for chart requests
 let activePeriod    = null;            // Currently loaded chart period
-let currentHorizon  = 'short';         // Investment horizon: 'short' | 'long'
 
 // ─── Auth helper ───
 function getAuthToken() {
@@ -28,94 +27,6 @@ function getAuthToken() {
 function getAuthHeaders() {
     const token = getAuthToken();
     return token ? { "Authorization": `Bearer ${token}` } : {};
-}
-
-// ═══════════════════════════════════════════
-// INVESTMENT HORIZON MANAGER
-// ═══════════════════════════════════════════
-
-// Chart period defaults per mode
-const HORIZON_CHART_PERIOD = { short: '1M', long: '1Y' };
-
-// Insight category priorities per mode (lower index = higher priority)
-const HORIZON_INSIGHT_PRIORITY = {
-    short: ['momentum', 'range', 'volatility', 'valuation', 'profitability', 'leverage'],
-    long:  ['valuation', 'profitability', 'leverage', 'margin', 'range', 'momentum', 'volatility']
-};
-
-/** Read the saved horizon from localStorage. */
-function getCurrentHorizon() {
-    return localStorage.getItem('stockguru_horizon') || 'short';
-}
-
-/** Persist and apply a new horizon mode. */
-function setHorizon(mode) {
-    if (mode !== 'short' && mode !== 'long') mode = 'short';
-    currentHorizon = mode;
-    localStorage.setItem('stockguru_horizon', mode);
-    updateHorizonUI(mode);
-    onHorizonChange(mode);
-}
-
-/** Update the toggle button states and slider position. */
-function updateHorizonUI(mode) {
-    const btnShort = document.getElementById('horizon-btn-short');
-    const btnLong  = document.getElementById('horizon-btn-long');
-    const slider   = document.getElementById('horizon-slider');
-    if (!btnShort || !btnLong || !slider) return;
-
-    btnShort.classList.toggle('active', mode === 'short');
-    btnLong.classList.toggle('active', mode === 'long');
-    slider.classList.toggle('slide-long', mode === 'long');
-}
-
-/** Initialize the horizon toggle — restore state and bind click events. */
-function initHorizonToggle() {
-    currentHorizon = getCurrentHorizon();
-    updateHorizonUI(currentHorizon);
-
-    document.querySelectorAll('.horizon-btn').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const mode = this.dataset.mode;
-            if (mode === currentHorizon) return; // already active
-            setHorizon(mode);
-        });
-    });
-}
-
-/**
- * Called whenever the horizon mode changes.
- * Orchestrates all downstream updates:
- *   1. Switch chart to the mode's default period
- *   2. Reload prediction with the new mode
- *   3. Re-sort insights by mode relevance
- *   4. Update signal headline
- */
-function onHorizonChange(mode) {
-    // 1. Switch chart period
-    const targetPeriod = HORIZON_CHART_PERIOD[mode];
-    // Update the active button visually
-    document.querySelectorAll('.chart-controls button').forEach(b => {
-        b.classList.toggle('active', b.dataset.period === targetPeriod);
-    });
-    activePeriod = null; // force reload
-    fetchAndRenderChart(targetPeriod);
-
-    // 2. Reload prediction with mode
-    loadPrediction(symbol);
-
-    // 3. Re-sort insights if data is cached
-    if (stockDetailsCache) {
-        generateInsights(stockDetailsCache);
-    }
-
-    // 4. Update signal headline
-    const headlineEl = document.getElementById('signal-headline');
-    if (headlineEl) {
-        headlineEl.textContent = mode === 'long' ? 'Long-Term Signal' : 'Short-Term Signal';
-    }
-
-    showToast(`Switched to ${mode === 'long' ? 'Long-Term' : 'Short-Term'} mode`);
 }
 
 // ─── Fetch stock details on page load ───
@@ -312,7 +223,7 @@ function generateInsights(data) {
     const price = data.price;
     const insights = [];
 
-    // 1. 52-Week Range Position  [category: range]
+    // 1. 52-Week Range Position
     if (price != null && cm.weekHigh52 != null && cm.weekLow52 != null && cm.weekHigh52 !== cm.weekLow52) {
         const range = cm.weekHigh52 - cm.weekLow52;
         const position = ((price - cm.weekLow52) / range) * 100;
@@ -321,37 +232,33 @@ function generateInsights(data) {
                 icon: '⬆', iconColor: 'green', accent: 'green',
                 title: 'Near 52-Week High',
                 desc: `Trading at <strong>${position.toFixed(0)}%</strong> of its 52-week range — within striking distance of <strong>${fmt(cm.weekHigh52)}</strong>.`,
-                signal: 'Bullish Zone', sigColor: 'green',
-                category: 'range'
+                signal: 'Bullish Zone', sigColor: 'green'
             });
         } else if (position <= 15) {
             insights.push({
                 icon: '⬇', iconColor: 'red', accent: 'red',
                 title: 'Near 52-Week Low',
                 desc: `Trading at just <strong>${position.toFixed(0)}%</strong> of its 52-week range — close to the yearly low of <strong>${fmt(cm.weekLow52)}</strong>.`,
-                signal: 'Watch Closely', sigColor: 'red',
-                category: 'range'
+                signal: 'Watch Closely', sigColor: 'red'
             });
         } else if (position >= 50) {
             insights.push({
                 icon: '◈', iconColor: 'blue', accent: 'blue',
                 title: '52-Week Range Position',
                 desc: `Price sits at <strong>${position.toFixed(0)}%</strong> of its yearly range — leaning toward the upper half between <strong>${fmt(cm.weekLow52)}</strong> and <strong>${fmt(cm.weekHigh52)}</strong>.`,
-                signal: 'Above Mid-Range', sigColor: 'blue',
-                category: 'range'
+                signal: 'Above Mid-Range', sigColor: 'blue'
             });
         } else {
             insights.push({
                 icon: '◈', iconColor: 'yellow', accent: 'yellow',
                 title: '52-Week Range Position',
                 desc: `Price sits at <strong>${position.toFixed(0)}%</strong> of its yearly range — in the lower half between <strong>${fmt(cm.weekLow52)}</strong> and <strong>${fmt(cm.weekHigh52)}</strong>.`,
-                signal: 'Below Mid-Range', sigColor: 'yellow',
-                category: 'range'
+                signal: 'Below Mid-Range', sigColor: 'yellow'
             });
         }
     }
 
-    // 2. P/E Ratio Valuation  [category: valuation]
+    // 2. P/E Ratio Valuation
     if (cm.peRatio != null) {
         const pe = Number(cm.peRatio);
         if (pe > 0 && pe < 15) {
@@ -359,37 +266,33 @@ function generateInsights(data) {
                 icon: '◎', iconColor: 'green', accent: 'green',
                 title: 'Valuation Looks Attractive',
                 desc: `P/E ratio of <strong>${pe.toFixed(1)}</strong> is below the market average — may indicate undervalued or a value opportunity.`,
-                signal: 'Low P/E', sigColor: 'green',
-                category: 'valuation'
+                signal: 'Low P/E', sigColor: 'green'
             });
         } else if (pe >= 15 && pe <= 25) {
             insights.push({
                 icon: '◎', iconColor: 'blue', accent: 'blue',
                 title: 'Fair Valuation',
                 desc: `P/E ratio of <strong>${pe.toFixed(1)}</strong> is within the typical market range — suggests reasonable pricing.`,
-                signal: 'Moderate P/E', sigColor: 'blue',
-                category: 'valuation'
+                signal: 'Moderate P/E', sigColor: 'blue'
             });
         } else if (pe > 25) {
             insights.push({
                 icon: '◎', iconColor: 'yellow', accent: 'yellow',
                 title: 'Valuation Appears High',
                 desc: `P/E ratio of <strong>${pe.toFixed(1)}</strong> exceeds market average — could signal high growth expectations or overvaluation.`,
-                signal: 'High P/E', sigColor: 'yellow',
-                category: 'valuation'
+                signal: 'High P/E', sigColor: 'yellow'
             });
         } else if (pe < 0) {
             insights.push({
                 icon: '◎', iconColor: 'red', accent: 'red',
                 title: 'Negative Earnings',
                 desc: `P/E ratio is <strong>negative</strong> — the company is currently not profitable. Proceed with caution.`,
-                signal: 'Negative P/E', sigColor: 'red',
-                category: 'valuation'
+                signal: 'Negative P/E', sigColor: 'red'
             });
         }
     }
 
-    // 3. Return on Equity  [category: profitability]
+    // 3. Return on Equity
     if (cm.roe != null) {
         const roe = Number(cm.roe);
         if (roe >= 20) {
@@ -397,29 +300,26 @@ function generateInsights(data) {
                 icon: '★', iconColor: 'green', accent: 'green',
                 title: 'Strong Profitability',
                 desc: `ROE of <strong>${roe.toFixed(1)}%</strong> shows the company generates excellent returns on shareholder equity.`,
-                signal: 'High ROE', sigColor: 'green',
-                category: 'profitability'
+                signal: 'High ROE', sigColor: 'green'
             });
         } else if (roe >= 10 && roe < 20) {
             insights.push({
                 icon: '★', iconColor: 'blue', accent: 'blue',
                 title: 'Solid Profitability',
                 desc: `ROE of <strong>${roe.toFixed(1)}%</strong> indicates decent returns on equity — within a healthy range.`,
-                signal: 'Good ROE', sigColor: 'blue',
-                category: 'profitability'
+                signal: 'Good ROE', sigColor: 'blue'
             });
         } else if (roe >= 0 && roe < 10) {
             insights.push({
                 icon: '★', iconColor: 'yellow', accent: 'yellow',
                 title: 'Modest Profitability',
                 desc: `ROE of <strong>${roe.toFixed(1)}%</strong> is below average — the company may be underutilizing equity.`,
-                signal: 'Low ROE', sigColor: 'yellow',
-                category: 'profitability'
+                signal: 'Low ROE', sigColor: 'yellow'
             });
         }
     }
 
-    // 4. Beta / Volatility  [category: volatility]
+    // 4. Beta / Volatility
     if (cm.beta != null) {
         const beta = Number(cm.beta);
         if (beta > 1.5) {
@@ -427,29 +327,26 @@ function generateInsights(data) {
                 icon: '⚡', iconColor: 'red', accent: 'red',
                 title: 'High Volatility',
                 desc: `Beta of <strong>${beta.toFixed(2)}</strong> means this stock is significantly more volatile than the market — higher risk/reward.`,
-                signal: 'High Beta', sigColor: 'red',
-                category: 'volatility'
+                signal: 'High Beta', sigColor: 'red'
             });
         } else if (beta >= 1.0 && beta <= 1.5) {
             insights.push({
                 icon: '⚡', iconColor: 'yellow', accent: 'yellow',
                 title: 'Above-Average Volatility',
                 desc: `Beta of <strong>${beta.toFixed(2)}</strong> indicates slightly higher volatility than the broader market.`,
-                signal: 'Moderate Beta', sigColor: 'yellow',
-                category: 'volatility'
+                signal: 'Moderate Beta', sigColor: 'yellow'
             });
         } else if (beta >= 0 && beta < 1.0) {
             insights.push({
                 icon: '⚡', iconColor: 'green', accent: 'green',
                 title: 'Lower Volatility',
                 desc: `Beta of <strong>${beta.toFixed(2)}</strong> suggests this stock is less volatile than the market — more stability.`,
-                signal: 'Low Beta', sigColor: 'green',
-                category: 'volatility'
+                signal: 'Low Beta', sigColor: 'green'
             });
         }
     }
 
-    // 5. Net Margin — Business Health  [category: margin]
+    // 5. Net Margin — Business Health
     if (cm.netMargin != null) {
         const nm = Number(cm.netMargin);
         if (nm >= 20) {
@@ -457,37 +354,33 @@ function generateInsights(data) {
                 icon: '▣', iconColor: 'green', accent: 'green',
                 title: 'Excellent Margins',
                 desc: `Net margin of <strong>${nm.toFixed(1)}%</strong> indicates a highly profitable business model with strong pricing power.`,
-                signal: 'Premium Margin', sigColor: 'green',
-                category: 'margin'
+                signal: 'Premium Margin', sigColor: 'green'
             });
         } else if (nm >= 10 && nm < 20) {
             insights.push({
                 icon: '▣', iconColor: 'blue', accent: 'blue',
                 title: 'Healthy Margins',
                 desc: `Net margin of <strong>${nm.toFixed(1)}%</strong> shows a solid bottom line — typical of a well-run company.`,
-                signal: 'Good Margin', sigColor: 'blue',
-                category: 'margin'
+                signal: 'Good Margin', sigColor: 'blue'
             });
         } else if (nm >= 0 && nm < 10) {
             insights.push({
                 icon: '▣', iconColor: 'yellow', accent: 'yellow',
                 title: 'Thin Margins',
                 desc: `Net margin of <strong>${nm.toFixed(1)}%</strong> is on the thinner side — may face pressure in downturns.`,
-                signal: 'Low Margin', sigColor: 'yellow',
-                category: 'margin'
+                signal: 'Low Margin', sigColor: 'yellow'
             });
         } else if (nm < 0) {
             insights.push({
                 icon: '▣', iconColor: 'red', accent: 'red',
                 title: 'Negative Margins',
                 desc: `Net margin is <strong>${nm.toFixed(1)}%</strong> — the company is losing money on revenue.`,
-                signal: 'Losing Money', sigColor: 'red',
-                category: 'margin'
+                signal: 'Losing Money', sigColor: 'red'
             });
         }
     }
 
-    // 6. Debt-to-Equity  [category: leverage]
+    // 6. Debt-to-Equity
     if (cm.debtToEquity != null) {
         const de = Number(cm.debtToEquity);
         if (de > 2.0) {
@@ -495,36 +388,24 @@ function generateInsights(data) {
                 icon: '⬥', iconColor: 'red', accent: 'red',
                 title: 'Heavy Debt Load',
                 desc: `Debt/Equity of <strong>${de.toFixed(2)}</strong> is high — the company relies heavily on debt financing.`,
-                signal: 'High Leverage', sigColor: 'red',
-                category: 'leverage'
+                signal: 'High Leverage', sigColor: 'red'
             });
         } else if (de >= 0.5 && de <= 2.0) {
             insights.push({
                 icon: '⬥', iconColor: 'blue', accent: 'blue',
                 title: 'Moderate Leverage',
                 desc: `Debt/Equity of <strong>${de.toFixed(2)}</strong> is within a reasonable range — balanced capital structure.`,
-                signal: 'Balanced Debt', sigColor: 'blue',
-                category: 'leverage'
+                signal: 'Balanced Debt', sigColor: 'blue'
             });
         } else if (de >= 0 && de < 0.5) {
             insights.push({
                 icon: '⬥', iconColor: 'green', accent: 'green',
                 title: 'Low Debt',
                 desc: `Debt/Equity of <strong>${de.toFixed(2)}</strong> signals a conservatively financed company with low risk.`,
-                signal: 'Low Leverage', sigColor: 'green',
-                category: 'leverage'
+                signal: 'Low Leverage', sigColor: 'green'
             });
         }
     }
-
-    // ── Sort insights by current horizon mode priority ──
-    const priorities = HORIZON_INSIGHT_PRIORITY[currentHorizon] || HORIZON_INSIGHT_PRIORITY.short;
-    insights.sort((a, b) => {
-        const idxA = priorities.indexOf(a.category);
-        const idxB = priorities.indexOf(b.category);
-        // Categories not in the priority list go to the end
-        return (idxA === -1 ? 99 : idxA) - (idxB === -1 ? 99 : idxB);
-    });
 
     // Render insights (cap at 6)
     const section = document.getElementById('insights-section');
@@ -533,9 +414,8 @@ function generateInsights(data) {
 
     if (insights.length === 0 || !section || !grid) return;
 
-    const modeLabel = currentHorizon === 'long' ? 'Long-Term' : 'Short-Term';
     const capped = insights.slice(0, 6);
-    badge.textContent = `${capped.length} Signals · ${modeLabel}`;
+    badge.textContent = `${capped.length} Signals`;
     grid.innerHTML = capped.map(renderInsightCard).join('');
     section.style.display = 'block';
 }
@@ -640,8 +520,7 @@ function renderOverallSignal(data) {
 
     section.className = `overall-signal ${sigClass}`;
     document.getElementById('signal-icon-lg').textContent = icon;
-    const modeLabel = currentHorizon === 'long' ? 'Long-Term Signal' : 'Short-Term Signal';
-    document.getElementById('signal-headline').textContent = modeLabel;
+    document.getElementById('signal-headline').textContent = 'Overall Signal';
     document.getElementById('signal-verdict').textContent = verdict;
     document.getElementById('confidence-fill').style.width = `${confidence}%`;
     document.getElementById('confidence-pct').textContent = `${confidence}%`;
@@ -1154,8 +1033,7 @@ async function loadPrediction(sym) {
     noteEl.style.display  = 'none';
 
     try {
-        const mode = currentHorizon || 'short';
-        const res = await fetch(`${API_BASE}/stocks/${encodeURIComponent(sym)}/prediction?mode=${mode}`);
+        const res = await fetch(`${API_BASE}/stocks/${encodeURIComponent(sym)}/prediction`);
         const data = await res.json();
 
         loader.style.display = 'none';
@@ -1223,8 +1101,7 @@ function renderPrediction(data) {
         priceSub.textContent = `${sign}${pct}% from current`;
         priceEl.className = `pred-tile-value ${diff >= 0 ? 'val-green' : 'val-red'}`;
     } else {
-        const isLong = data.mode === 'long';
-        priceSub.textContent = isLong ? '30-day outlook' : 'Next-day estimate';
+        priceSub.textContent = 'Next-day estimate';
     }
 
     // ── Expected Range ──
@@ -1267,22 +1144,6 @@ function renderPrediction(data) {
     // Show grid and note
     grid.style.display   = 'grid';
     noteEl.style.display  = 'block';
-
-    // Update note text based on mode
-    if (data.explanation) {
-        noteEl.textContent = `${data.explanation} This is not financial advice.`;
-    } else {
-        const isLong = data.mode === 'long';
-        noteEl.textContent = isLong
-            ? 'Based on long-term moving averages, broader trend, and linear regression. This is not financial advice.'
-            : 'Based on short-term moving averages, momentum, and trend estimation. This is not financial advice.';
-    }
-
-    // Update prediction badge to show mode
-    const badgeEl = document.getElementById('prediction-badge');
-    if (badgeEl) {
-        badgeEl.textContent = data.mode === 'long' ? 'AI · LONG' : 'AI · SHORT';
-    }
 }
 
 /**
@@ -1305,18 +1166,9 @@ function showPredictionError(message) {
 // BOOT
 // ═══════════════════════════════════════════
 (async () => {
-    // Initialize horizon toggle first (restores from localStorage)
-    initHorizonToggle();
     initChart();
     await loadStockDetails();
-
-    // Use stored horizon mode for initial chart period and prediction
-    const initialPeriod = HORIZON_CHART_PERIOD[currentHorizon] || '1M';
-    // Set the correct chart button as active
-    document.querySelectorAll('.chart-controls button').forEach(b => {
-        b.classList.toggle('active', b.dataset.period === initialPeriod);
-    });
-    fetchAndRenderChart(initialPeriod);
+    fetchAndRenderChart('1M');
     loadPrediction(symbol);
     initWatchlistButton();
 })();

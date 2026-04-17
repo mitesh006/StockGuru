@@ -2,14 +2,11 @@
  * prediction.controller.js — ML Prediction Controller
  *
  * Connects the Node.js backend with the Python prediction script.
- * Supports dual investment-horizon modes: "short" and "long".
- *
  * Flow:
- *   1. Read ?mode=short|long from query params
- *   2. Fetch historical chart data (3M for short, 1Y for long)
- *   3. Extract closing prices from candle objects
- *   4. Pipe { prices, mode } into `backend/ml/predict_stock.py` via child_process.spawn
- *   5. Parse Python's JSON stdout and return it as the API response
+ *   1. Fetch historical chart data via AlphaVantage service
+ *   2. Extract closing prices from candle objects (supports { price }, { close }, { c })
+ *   3. Pipe prices into `backend/ml/predict_stock.py` via child_process.spawn
+ *   4. Parse Python's JSON stdout and return it as the API response
  */
 
 const path = require("path");
@@ -18,12 +15,6 @@ const { getChartData } = require("../services/alphaVantage.service");
 
 // Absolute path to the Python prediction script
 const PYTHON_SCRIPT = path.resolve(__dirname, "../../ml/predict_stock.py");
-
-// Period to fetch based on horizon mode
-const MODE_PERIODS = {
-    short: "3M",   // ~90 days of daily prices for short-term analysis
-    long:  "1Y",   // ~365 days for long-term trend analysis
-};
 
 // ═══════════════════════════════════════════
 // HELPERS
@@ -51,10 +42,9 @@ function extractClose(candle) {
  * Returns a Promise that resolves with the parsed JSON output.
  *
  * @param {number[]} prices - Array of closing prices
- * @param {string} mode - "short" or "long"
  * @returns {Promise<Object>}
  */
-function runPythonPredict(prices, mode) {
+function runPythonPredict(prices) {
     return new Promise((resolve, reject) => {
         const py = spawn("python", [PYTHON_SCRIPT], {
             stdio: ["pipe", "pipe", "pipe"],
@@ -94,8 +84,8 @@ function runPythonPredict(prices, mode) {
             }
         });
 
-        // Write the prices + mode payload to stdin and close the stream
-        py.stdin.write(JSON.stringify({ prices, mode }));
+        // Write the prices payload to stdin and close the stream
+        py.stdin.write(JSON.stringify({ prices }));
         py.stdin.end();
     });
 }
@@ -108,37 +98,27 @@ function runPythonPredict(prices, mode) {
  * GET /api/stocks/:symbol/prediction
  *
  * Query params (optional):
- *   ?mode=short  — short-term prediction (default)
- *   ?mode=long   — long-term prediction
- *   ?period=6M   — override chart period (rarely needed)
+ *   ?period=1M  — chart period to use for historical data (default "6M")
  *
  * Response (200):
  * {
  *   success: true,
  *   symbol: "AAPL",
- *   mode: "short",
  *   trend: "Bullish",
  *   predictedPrice: 189.42,
  *   predictedRange: { low: 185.10, high: 193.74 },
  *   confidence: 72,
- *   explanation: "Based on 5/10-day moving averages...",
- *   indicators: { maShort, maLong, recentReturn, slope, volatility, rSquared },
- *   dataPoints: 90
+ *   indicators: { ma5, ma20, recentReturn, slope, volatility },
+ *   dataPoints: 120
  * }
  */
 async function getPrediction(req, res) {
     const { symbol } = req.params;
-
-    // ── Validate mode ──
-    const rawMode = (req.query.mode || "short").toLowerCase();
-    const mode = rawMode === "long" ? "long" : "short";
-
-    // Use explicit period if provided, otherwise derive from mode
-    const period = req.query.period || MODE_PERIODS[mode];
+    const period = req.query.period || "6M";
 
     try {
         // ── 1. Fetch historical chart data ──
-        console.log(`[Prediction] Fetching chart data for ${symbol} (${period}, mode=${mode})...`);
+        console.log(`[Prediction] Fetching chart data for ${symbol} (${period})...`);
         const chartResult = await getChartData(symbol, period);
 
         if (!chartResult.success || !chartResult.points || chartResult.points.length === 0) {
@@ -160,9 +140,9 @@ async function getPrediction(req, res) {
             });
         }
 
-        // ── 3. Run Python prediction with mode ──
-        console.log(`[Prediction] Running ${mode}-term prediction on ${prices.length} data points...`);
-        const prediction = await runPythonPredict(prices, mode);
+        // ── 3. Run Python prediction ──
+        console.log(`[Prediction] Running ML prediction on ${prices.length} data points...`);
+        const prediction = await runPythonPredict(prices);
 
         if (!prediction.success) {
             return res.status(422).json({
@@ -175,12 +155,10 @@ async function getPrediction(req, res) {
         return res.json({
             success: true,
             symbol: symbol.toUpperCase(),
-            mode: prediction.mode || mode,
             trend: prediction.trend,
             predictedPrice: prediction.predictedPrice,
             predictedRange: prediction.predictedRange,
             confidence: prediction.confidence,
-            explanation: prediction.explanation,
             indicators: prediction.indicators,
             dataPoints: prices.length,
         });
