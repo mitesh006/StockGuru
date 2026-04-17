@@ -1,6 +1,7 @@
 // stock.js — Stock Detail page logic
 // POLISHED: AbortController-based chart requests, proper loading/error/empty
 // states, same-period guard, watchlist add/remove with JWT auth.
+// UPGRADED: Chart Intelligence, Overall Signal, Quick Decision panels.
 
 const API_BASE = "http://localhost:3000/api";
 const params = new URLSearchParams(window.location.search);
@@ -150,8 +151,10 @@ function displayStockData(data) {
     // ── Detailed Fundamentals ──
     renderFundamentals(data.annualFundamentals, data.quarterlyFundamentals);
 
-    // ── Smart Insights ──
+    // ── Analysis Panels ──
     generateInsights(data);
+    renderOverallSignal(data);
+    renderDecisionPanel(data);
 }
 
 // ─── Detailed Fundamentals (Tabs) ───
@@ -434,6 +437,289 @@ function renderInsightCard(ins) {
 }
 
 // ═══════════════════════════════════════════
+// OVERALL SIGNAL ENGINE
+// ═══════════════════════════════════════════
+function renderOverallSignal(data) {
+    const cm = data.currentMetrics || {};
+    const section = document.getElementById('overall-signal');
+    if (!section) return;
+
+    // Scoring system: each factor contributes +1 (bullish), 0 (neutral), or -1 (bearish)
+    let score = 0;
+    let factors = 0;
+
+    // Price vs previous close
+    if (data.price != null && data.previousClose != null) {
+        const changePct = ((data.price - data.previousClose) / data.previousClose) * 100;
+        if (changePct > 1) { score += 1; } else if (changePct < -1) { score -= 1; }
+        factors++;
+    }
+
+    // 52-week range position
+    if (data.price != null && cm.weekHigh52 != null && cm.weekLow52 != null && cm.weekHigh52 !== cm.weekLow52) {
+        const pos = ((data.price - cm.weekLow52) / (cm.weekHigh52 - cm.weekLow52)) * 100;
+        if (pos >= 70) { score += 1; } else if (pos <= 30) { score -= 1; }
+        factors++;
+    }
+
+    // P/E Ratio
+    if (cm.peRatio != null) {
+        const pe = Number(cm.peRatio);
+        if (pe > 0 && pe < 20) { score += 1; } else if (pe > 35 || pe < 0) { score -= 1; }
+        factors++;
+    }
+
+    // ROE
+    if (cm.roe != null) {
+        const roe = Number(cm.roe);
+        if (roe >= 15) { score += 1; } else if (roe < 5) { score -= 1; }
+        factors++;
+    }
+
+    // Net Margin
+    if (cm.netMargin != null) {
+        const nm = Number(cm.netMargin);
+        if (nm >= 15) { score += 1; } else if (nm < 0) { score -= 1; }
+        factors++;
+    }
+
+    // Beta
+    if (cm.beta != null) {
+        const beta = Number(cm.beta);
+        if (beta >= 0.5 && beta <= 1.2) { score += 1; } else if (beta > 2.0) { score -= 1; }
+        factors++;
+    }
+
+    // Debt/Equity
+    if (cm.debtToEquity != null) {
+        const de = Number(cm.debtToEquity);
+        if (de < 1.0) { score += 1; } else if (de > 2.5) { score -= 1; }
+        factors++;
+    }
+
+    if (factors === 0) return;
+
+    // Normalize score to -1...+1 range
+    const normalized = score / factors;
+    const confidence = Math.min(Math.round(Math.abs(normalized) * 100), 95);
+
+    let verdict, sigClass, icon;
+    if (normalized > 0.15) {
+        verdict = 'Bullish';
+        sigClass = 'sig-bullish';
+        icon = '▲';
+    } else if (normalized < -0.15) {
+        verdict = 'Bearish';
+        sigClass = 'sig-bearish';
+        icon = '▼';
+    } else {
+        verdict = 'Neutral';
+        sigClass = 'sig-neutral';
+        icon = '◆';
+    }
+
+    section.className = `overall-signal ${sigClass}`;
+    document.getElementById('signal-icon-lg').textContent = icon;
+    document.getElementById('signal-headline').textContent = 'Overall Signal';
+    document.getElementById('signal-verdict').textContent = verdict;
+    document.getElementById('confidence-fill').style.width = `${confidence}%`;
+    document.getElementById('confidence-pct').textContent = `${confidence}%`;
+    section.style.display = 'block';
+}
+
+// ═══════════════════════════════════════════
+// QUICK DECISION PANEL
+// ═══════════════════════════════════════════
+function renderDecisionPanel(data) {
+    const cm = data.currentMetrics || {};
+    const section = document.getElementById('decision-panel');
+    if (!section) return;
+
+    const strengths = [];
+    const risks = [];
+
+    // ── Strengths ──
+    if (cm.roe != null && Number(cm.roe) >= 15) {
+        strengths.push(`Strong return on equity at <strong>${Number(cm.roe).toFixed(1)}%</strong> — efficient use of capital`);
+    }
+    if (cm.netMargin != null && Number(cm.netMargin) >= 15) {
+        strengths.push(`Healthy net margin of <strong>${Number(cm.netMargin).toFixed(1)}%</strong> — solid profitability`);
+    }
+    if (cm.peRatio != null && Number(cm.peRatio) > 0 && Number(cm.peRatio) < 20) {
+        strengths.push(`Reasonable P/E of <strong>${Number(cm.peRatio).toFixed(1)}</strong> — not overpriced relative to earnings`);
+    }
+    if (cm.debtToEquity != null && Number(cm.debtToEquity) < 1.0) {
+        strengths.push(`Low debt-to-equity of <strong>${Number(cm.debtToEquity).toFixed(2)}</strong> — conservative financing`);
+    }
+    if (cm.beta != null && Number(cm.beta) >= 0.5 && Number(cm.beta) <= 1.2) {
+        strengths.push(`Stable beta of <strong>${Number(cm.beta).toFixed(2)}</strong> — manageable volatility`);
+    }
+    if (cm.currentRatio != null && Number(cm.currentRatio) >= 1.5) {
+        strengths.push(`Strong current ratio of <strong>${Number(cm.currentRatio).toFixed(2)}</strong> — good short-term liquidity`);
+    }
+    if (cm.operatingMargin != null && Number(cm.operatingMargin) >= 20) {
+        strengths.push(`High operating margin of <strong>${Number(cm.operatingMargin).toFixed(1)}%</strong> — strong core business`);
+    }
+    if (data.price != null && cm.weekHigh52 != null && cm.weekLow52 != null) {
+        const pos = ((data.price - cm.weekLow52) / (cm.weekHigh52 - cm.weekLow52)) * 100;
+        if (pos >= 75) {
+            strengths.push(`Trading near 52-week high — strong momentum and investor confidence`);
+        }
+    }
+
+    // ── Risks ──
+    if (cm.peRatio != null && Number(cm.peRatio) > 35) {
+        risks.push(`High P/E ratio of <strong>${Number(cm.peRatio).toFixed(1)}</strong> — may be overvalued or priced for perfection`);
+    }
+    if (cm.peRatio != null && Number(cm.peRatio) < 0) {
+        risks.push(`Negative P/E — the company is currently <strong>unprofitable</strong>`);
+    }
+    if (cm.debtToEquity != null && Number(cm.debtToEquity) > 2.0) {
+        risks.push(`Heavy debt load with D/E of <strong>${Number(cm.debtToEquity).toFixed(2)}</strong> — financial risk`);
+    }
+    if (cm.beta != null && Number(cm.beta) > 1.5) {
+        risks.push(`High beta of <strong>${Number(cm.beta).toFixed(2)}</strong> — significantly more volatile than market`);
+    }
+    if (cm.netMargin != null && Number(cm.netMargin) < 0) {
+        risks.push(`Negative net margin of <strong>${Number(cm.netMargin).toFixed(1)}%</strong> — company is losing money`);
+    }
+    if (cm.netMargin != null && Number(cm.netMargin) >= 0 && Number(cm.netMargin) < 5) {
+        risks.push(`Thin net margin of <strong>${Number(cm.netMargin).toFixed(1)}%</strong> — vulnerable to cost increases`);
+    }
+    if (cm.currentRatio != null && Number(cm.currentRatio) < 1.0) {
+        risks.push(`Current ratio below 1.0 (<strong>${Number(cm.currentRatio).toFixed(2)}</strong>) — potential liquidity concern`);
+    }
+    if (cm.roe != null && Number(cm.roe) < 5) {
+        risks.push(`Low ROE of <strong>${Number(cm.roe).toFixed(1)}%</strong> — poor capital efficiency`);
+    }
+    if (data.price != null && cm.weekHigh52 != null && cm.weekLow52 != null) {
+        const pos = ((data.price - cm.weekLow52) / (cm.weekHigh52 - cm.weekLow52)) * 100;
+        if (pos <= 20) {
+            risks.push(`Trading near 52-week low — possible downtrend or underlying issues`);
+        }
+    }
+
+    // If we have neither strengths nor risks, hide the panel
+    if (strengths.length === 0 && risks.length === 0) return;
+
+    // Render
+    const strengthsList = document.getElementById('strengths-list');
+    const risksList = document.getElementById('risks-list');
+
+    strengthsList.innerHTML = strengths.length > 0
+        ? strengths.map(s => `<li>${s}</li>`).join('')
+        : '<li>No standout strengths identified from available data.</li>';
+
+    risksList.innerHTML = risks.length > 0
+        ? risks.map(r => `<li>${r}</li>`).join('')
+        : '<li>No major risks identified from available data.</li>';
+
+    // Conclusion
+    const conclusionEl = document.getElementById('decision-conclusion');
+    const totalFactors = strengths.length + risks.length;
+    const ratio = totalFactors > 0 ? strengths.length / totalFactors : 0.5;
+
+    let conclusionText, conclusionClass;
+    if (ratio >= 0.65) {
+        conclusionText = `<strong>Summary:</strong> ${data.company?.name || symbol} shows predominantly positive fundamentals with <strong>${strengths.length} strengths</strong> vs <strong>${risks.length} risks</strong>. The data suggests a relatively favorable outlook, though investors should always conduct thorough due diligence.`;
+        conclusionClass = 'conclusion-bullish';
+    } else if (ratio <= 0.35) {
+        conclusionText = `<strong>Summary:</strong> ${data.company?.name || symbol} presents several risk factors with <strong>${risks.length} risks</strong> vs <strong>${strengths.length} strengths</strong>. Caution is warranted — consider reviewing the full financial picture before making investment decisions.`;
+        conclusionClass = 'conclusion-bearish';
+    } else {
+        conclusionText = `<strong>Summary:</strong> ${data.company?.name || symbol} shows a mixed profile with <strong>${strengths.length} strengths</strong> and <strong>${risks.length} risks</strong>. The picture is balanced — further analysis of industry context and growth trajectory is recommended.`;
+        conclusionClass = 'conclusion-neutral';
+    }
+
+    conclusionEl.innerHTML = conclusionText;
+    conclusionEl.className = `decision-conclusion ${conclusionClass}`;
+    section.style.display = 'block';
+}
+
+// ═══════════════════════════════════════════
+// CHART INTELLIGENCE PANEL
+// ═══════════════════════════════════════════
+function updateChartIntelligence(points) {
+    const section = document.getElementById('chart-intel');
+    if (!section || !points || points.length < 2) {
+        if (section) section.style.display = 'none';
+        return;
+    }
+
+    const prices = points.map(p => p.price);
+    const first = prices[0];
+    const last = prices[prices.length - 1];
+    const high = Math.max(...prices);
+    const low = Math.min(...prices);
+
+    // 1. Trend Direction
+    const trendVal = document.getElementById('intel-trend-val');
+    const trendSub = document.getElementById('intel-trend-sub');
+    const changePct = ((last - first) / first) * 100;
+    if (last > first) {
+        trendVal.textContent = '▲ Bullish';
+        trendVal.className = 'intel-value val-green';
+        trendSub.textContent = 'Upward movement';
+    } else if (last < first) {
+        trendVal.textContent = '▼ Bearish';
+        trendVal.className = 'intel-value val-red';
+        trendSub.textContent = 'Downward movement';
+    } else {
+        trendVal.textContent = '◆ Flat';
+        trendVal.className = 'intel-value val-yellow';
+        trendSub.textContent = 'No clear direction';
+    }
+
+    // 2. Period Return
+    const returnVal = document.getElementById('intel-return-val');
+    const returnSub = document.getElementById('intel-return-sub');
+    const sign = changePct >= 0 ? '+' : '';
+    returnVal.textContent = `${sign}${changePct.toFixed(2)}%`;
+    returnVal.className = `intel-value ${changePct >= 0 ? 'val-green' : 'val-red'}`;
+    returnSub.textContent = `${fmt(first)} → ${fmt(last)}`;
+
+    // 3. Price Range
+    const rangeVal = document.getElementById('intel-range-val');
+    const rangeSub = document.getElementById('intel-range-sub');
+    rangeVal.textContent = `${fmt(low)} — ${fmt(high)}`;
+    rangeVal.className = 'intel-value';
+    const rangeSpread = ((high - low) / low * 100).toFixed(1);
+    rangeSub.textContent = `${rangeSpread}% spread`;
+
+    // 4. Momentum (simple: compare last 20% of points average vs first 20%)
+    const momVal = document.getElementById('intel-momentum-val');
+    const momSub = document.getElementById('intel-momentum-sub');
+    const chunk = Math.max(Math.floor(prices.length * 0.2), 1);
+    const earlyAvg = prices.slice(0, chunk).reduce((a, b) => a + b, 0) / chunk;
+    const lateAvg = prices.slice(-chunk).reduce((a, b) => a + b, 0) / chunk;
+    const momPct = ((lateAvg - earlyAvg) / earlyAvg) * 100;
+
+    if (momPct > 3) {
+        momVal.textContent = '▲ Strong';
+        momVal.className = 'intel-value val-green';
+        momSub.textContent = `+${momPct.toFixed(1)}% acceleration`;
+    } else if (momPct > 0.5) {
+        momVal.textContent = '↗ Moderate';
+        momVal.className = 'intel-value val-blue';
+        momSub.textContent = `+${momPct.toFixed(1)}% gaining`;
+    } else if (momPct < -3) {
+        momVal.textContent = '▼ Weak';
+        momVal.className = 'intel-value val-red';
+        momSub.textContent = `${momPct.toFixed(1)}% deceleration`;
+    } else if (momPct < -0.5) {
+        momVal.textContent = '↘ Fading';
+        momVal.className = 'intel-value val-yellow';
+        momSub.textContent = `${momPct.toFixed(1)}% slowing`;
+    } else {
+        momVal.textContent = '◆ Neutral';
+        momVal.className = 'intel-value val-blue';
+        momSub.textContent = 'Sideways momentum';
+    }
+
+    section.style.display = 'grid';
+}
+
+// ═══════════════════════════════════════════
 // CHART.JS — AbortController-based requests
 // ═══════════════════════════════════════════
 let priceChart;
@@ -550,6 +836,9 @@ async function fetchAndRenderChart(period = '1M') {
             document.getElementById("chart-error-msg").textContent = err.message || "Failed to load chart.";
         }
         if (canvas) canvas.style.opacity = "0";
+        // Hide intelligence panel on error
+        const intel = document.getElementById('chart-intel');
+        if (intel) intel.style.display = 'none';
     } finally {
         if (loader) loader.style.display = "none";
         if (chartAbort === controller) chartAbort = null;
@@ -576,6 +865,9 @@ function applyChartData(points, stale = false) {
             ? `📈 ${baseName} (cached)`
             : `📈 ${baseName}`;
     }
+
+    // Update Chart Intelligence panel
+    updateChartIntelligence(points);
 }
 
 // ─── Chart controls ───
