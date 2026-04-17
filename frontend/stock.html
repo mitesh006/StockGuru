@@ -179,7 +179,61 @@
                 <!-- Insight cards are injected by JS -->
             </div>
         </div>
-        <!-- ═══ 7. QUICK DECISION PANEL ═══ -->
+        <!-- ═══ 7. ML PREDICTION ═══ -->
+        <div class="prediction-section" id="prediction-section" style="display:none;">
+            <div class="section-heading">
+                <span class="section-heading-icon">◈</span> ML Price Prediction
+                <span class="prediction-badge" id="prediction-badge">AI</span>
+            </div>
+
+            <!-- Loading state -->
+            <div class="prediction-loader" id="prediction-loader" style="display:none;">
+                <div class="pred-shimmer-grid">
+                    <div class="pred-shimmer"></div>
+                    <div class="pred-shimmer"></div>
+                    <div class="pred-shimmer"></div>
+                    <div class="pred-shimmer"></div>
+                </div>
+            </div>
+
+            <!-- Error state -->
+            <div class="prediction-error" id="prediction-error" style="display:none;">
+                <div class="pred-error-icon">!</div>
+                <div class="pred-error-msg" id="prediction-error-msg">Prediction unavailable.</div>
+            </div>
+
+            <!-- Data tiles -->
+            <div class="prediction-grid" id="prediction-grid" style="display:none;">
+                <div class="pred-tile" id="pred-tile-trend">
+                    <div class="pred-tile-label">Trend</div>
+                    <div class="pred-tile-value" id="pred-trend">—</div>
+                    <div class="pred-tile-sub" id="pred-trend-sub"></div>
+                </div>
+                <div class="pred-tile" id="pred-tile-price">
+                    <div class="pred-tile-label">Predicted Price</div>
+                    <div class="pred-tile-value" id="pred-price">—</div>
+                    <div class="pred-tile-sub" id="pred-price-sub"></div>
+                </div>
+                <div class="pred-tile" id="pred-tile-range">
+                    <div class="pred-tile-label">Expected Range</div>
+                    <div class="pred-tile-value" id="pred-range">—</div>
+                    <div class="pred-tile-sub" id="pred-range-sub"></div>
+                </div>
+                <div class="pred-tile" id="pred-tile-confidence">
+                    <div class="pred-tile-label">Confidence</div>
+                    <div class="pred-tile-value" id="pred-confidence">—</div>
+                    <div class="pred-confidence-bar">
+                        <div class="pred-confidence-fill" id="pred-confidence-fill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="prediction-note" id="prediction-note" style="display:none;">
+                Based on moving averages, momentum, and trend estimation. This is not financial advice.
+            </div>
+        </div>
+
+        <!-- ═══ 8. QUICK DECISION PANEL ═══ -->
         <div class="decision-panel" id="decision-panel" style="display:none;">
             <div class="section-heading">
                 <span class="section-heading-icon">▶</span> Quick Decision Summary

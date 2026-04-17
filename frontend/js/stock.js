@@ -1010,11 +1010,165 @@ function showToast(msg) {
 }
 
 // ═══════════════════════════════════════════
+// ML PREDICTION
+// ═══════════════════════════════════════════
+
+/**
+ * Fetch prediction data from backend and render the prediction section.
+ * @param {string} sym - Stock ticker symbol
+ */
+async function loadPrediction(sym) {
+    const section  = document.getElementById('prediction-section');
+    const loader   = document.getElementById('prediction-loader');
+    const grid     = document.getElementById('prediction-grid');
+    const errorEl  = document.getElementById('prediction-error');
+    const noteEl   = document.getElementById('prediction-note');
+    if (!section) return;
+
+    // Show section with loading shimmer
+    section.style.display = 'block';
+    loader.style.display  = 'block';
+    grid.style.display    = 'none';
+    errorEl.style.display = 'none';
+    noteEl.style.display  = 'none';
+
+    try {
+        const res = await fetch(`${API_BASE}/stocks/${encodeURIComponent(sym)}/prediction`);
+        const data = await res.json();
+
+        loader.style.display = 'none';
+
+        if (!data.success) {
+            showPredictionError(data.message || 'Prediction unavailable for this stock.');
+            return;
+        }
+
+        renderPrediction(data);
+    } catch (err) {
+        console.error('[Prediction] Fetch error:', err);
+        loader.style.display = 'none';
+        showPredictionError('Could not load prediction. Please try again later.');
+    }
+}
+
+/**
+ * Render prediction data into the prediction tiles.
+ * @param {Object} data - Prediction response from API
+ */
+function renderPrediction(data) {
+    const grid   = document.getElementById('prediction-grid');
+    const noteEl = document.getElementById('prediction-note');
+    if (!grid) return;
+
+    // ── Trend ──
+    const trendEl    = document.getElementById('pred-trend');
+    const trendSub   = document.getElementById('pred-trend-sub');
+    const trendTile  = document.getElementById('pred-tile-trend');
+    const trend      = (data.trend || 'Sideways').toLowerCase();
+
+    // Clear old trend classes
+    trendTile.classList.remove('trend-bullish', 'trend-bearish', 'trend-sideways');
+
+    if (trend === 'bullish') {
+        trendEl.textContent = '▲ Bullish';
+        trendEl.className   = 'pred-tile-value val-green';
+        trendSub.textContent = 'Upward signal';
+        trendTile.classList.add('trend-bullish');
+    } else if (trend === 'bearish') {
+        trendEl.textContent = '▼ Bearish';
+        trendEl.className   = 'pred-tile-value val-red';
+        trendSub.textContent = 'Downward signal';
+        trendTile.classList.add('trend-bearish');
+    } else {
+        trendEl.textContent = '◆ Sideways';
+        trendEl.className   = 'pred-tile-value val-yellow';
+        trendSub.textContent = 'No clear direction';
+        trendTile.classList.add('trend-sideways');
+    }
+
+    // ── Predicted Price ──
+    const priceEl  = document.getElementById('pred-price');
+    const priceSub = document.getElementById('pred-price-sub');
+    priceEl.textContent = fmt(data.predictedPrice);
+    priceEl.className   = 'pred-tile-value';
+
+    // Compare with current price if available
+    if (stockDetailsCache && stockDetailsCache.price != null) {
+        const curr = stockDetailsCache.price;
+        const diff = data.predictedPrice - curr;
+        const pct  = ((diff / curr) * 100).toFixed(2);
+        const sign = diff >= 0 ? '+' : '';
+        priceSub.textContent = `${sign}${pct}% from current`;
+        priceEl.className = `pred-tile-value ${diff >= 0 ? 'val-green' : 'val-red'}`;
+    } else {
+        priceSub.textContent = 'Next-day estimate';
+    }
+
+    // ── Expected Range ──
+    const rangeEl  = document.getElementById('pred-range');
+    const rangeSub = document.getElementById('pred-range-sub');
+    if (data.predictedRange) {
+        rangeEl.textContent = `${fmt(data.predictedRange.low)} — ${fmt(data.predictedRange.high)}`;
+        const spread = ((data.predictedRange.high - data.predictedRange.low) / data.predictedRange.low * 100).toFixed(1);
+        rangeSub.textContent = `${spread}% spread`;
+    } else {
+        rangeEl.textContent = 'N/A';
+        rangeSub.textContent = '';
+    }
+
+    // ── Confidence ──
+    const confEl   = document.getElementById('pred-confidence');
+    const confFill = document.getElementById('pred-confidence-fill');
+    const conf     = data.confidence || 0;
+    confEl.textContent = `${conf}%`;
+
+    // Color-code confidence
+    let confClass;
+    if (conf >= 65) {
+        confEl.className = 'pred-tile-value val-green';
+        confClass = 'conf-high';
+    } else if (conf >= 45) {
+        confEl.className = 'pred-tile-value val-yellow';
+        confClass = 'conf-medium';
+    } else {
+        confEl.className = 'pred-tile-value val-red';
+        confClass = 'conf-low';
+    }
+
+    confFill.className = `pred-confidence-fill ${confClass}`;
+    // Animate the bar after a short delay for visual effect
+    requestAnimationFrame(() => {
+        confFill.style.width = `${conf}%`;
+    });
+
+    // Show grid and note
+    grid.style.display   = 'grid';
+    noteEl.style.display  = 'block';
+}
+
+/**
+ * Show prediction error message.
+ * @param {string} message
+ */
+function showPredictionError(message) {
+    const errorEl = document.getElementById('prediction-error');
+    const msgEl   = document.getElementById('prediction-error-msg');
+    const grid    = document.getElementById('prediction-grid');
+    const noteEl  = document.getElementById('prediction-note');
+
+    if (grid)    grid.style.display    = 'none';
+    if (noteEl)  noteEl.style.display  = 'none';
+    if (errorEl) errorEl.style.display = 'flex';
+    if (msgEl)   msgEl.textContent     = message;
+}
+
+// ═══════════════════════════════════════════
 // BOOT
 // ═══════════════════════════════════════════
 (async () => {
     initChart();
     await loadStockDetails();
     fetchAndRenderChart('1M');
+    loadPrediction(symbol);
     initWatchlistButton();
 })();
