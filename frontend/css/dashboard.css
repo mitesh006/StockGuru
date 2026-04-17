@@ -107,7 +107,12 @@
     letter-spacing: 1px;
 }
 
-.search-section { display: flex; justify-content: center; }
+.search-section { 
+    display: flex;
+    justify-content: center;
+    position: relative;
+    z-index: 100;
+}
 
 .search-container {
     display: flex;
@@ -289,13 +294,9 @@
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: 12px;
-    padding: 1.3rem 1rem;
-    text-align: center;
-    cursor: pointer;
-    text-decoration: none;
+    padding: 0.8rem 1.3rem;
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: 0.4rem;
     transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
 }
@@ -303,6 +304,15 @@
     border-color: var(--accent-green);
     transform: translateY(-4px);
     box-shadow: 0 6px 20px rgba(0,255,136,0.08);
+}
+
+.trending-view {
+    color: var(--accent-green);
+    cursor: pointer;
+    font-size: 0.rem;
+    font-weight: bold;
+    align-self: end;
+    padding: 0 0.5rem;
 }
 
 .trending-symbol {
@@ -322,6 +332,74 @@
 }
 .trending-change.pos { color: var(--accent-green); }
 .trending-change.neg { color: var(--accent-red); }
+
+/* Active card highlight */
+.trending-card.active {
+    border-color: var(--accent-green);
+    box-shadow: 0 0 16px rgba(0,255,136,0.15), inset 3px 0 0 var(--accent-green);
+    transform: translateY(-4px);
+}
+
+/* ═══════════════════════════════
+   CHART AREA (canvas + overlays)
+   ═══════════════════════════════ */
+.chart-area {
+    position: relative;
+    width: 100%;
+    height: 380px;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    overflow: hidden;
+}
+.chart-area canvas {
+    width: 100% !important;
+    height: 100% !important;
+    transition: opacity 0.35s ease;
+}
+.chart-loader,
+.chart-error {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    background: rgba(10,10,10,0.7);
+    z-index: 5;
+}
+.error-icon {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--accent-red);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 1.2rem;
+}
+.spinner-small {
+    width: 28px; height: 28px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--accent-green);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+.chart-placeholder-inner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    text-align: center;
+}
 
 /* ═══════════════════════════════
    CHART SECTION
@@ -442,7 +520,7 @@
     .overview-grid  { grid-template-columns: 1fr; }
     .trending-grid  { grid-template-columns: repeat(2, 1fr); }
     .dash-hero .page-header h1 { font-size: 2rem; }
-    .chart-placeholder { height: 280px; }
+    .chart-area { height: 280px; }
 }
 
 @media (max-width: 480px) {

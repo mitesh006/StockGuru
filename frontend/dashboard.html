@@ -8,6 +8,7 @@
     <meta name="description" content="Real-time stock market dashboard with live prices, indices, and trending stocks.">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="icon" href="favicon.ico">
 </head>
 
 <body>
@@ -74,7 +75,7 @@
         <!-- ═══ CHART SECTION ═══ -->
         <div class="chart-section">
             <div class="chart-header">
-                <h2 class="chart-title" id="chart-stock-title">AAPL — Apple Inc.</h2>
+                <h2 class="chart-title" id="chart-stock-title">Chart Unavailable</h2>
                 <div class="chart-controls">
                     <button class="active" data-period="1D">1D</button>
                     <button data-period="1W">1W</button>
@@ -84,16 +85,26 @@
                     <button data-period="5Y">5Y</button>
                 </div>
             </div>
-            <div id="stock-chart" class="chart-placeholder">
-                <div class="chart-placeholder-inner">
+            <div id="stock-chart" class="chart-area">
+                <canvas id="priceChart"></canvas>
+                <div class="chart-loader" id="chart-loader" style="display: none;">
+                    <div class="spinner-small"></div>
+                    <div>Loading chart data…</div>
+                </div>
+                <div class="chart-error" id="chart-error" style="display: none;">
+                    <div class="error-icon">!</div>
+                    <div id="chart-error-msg">Chart unavailable</div>
+                </div>
+                <div class="chart-placeholder-inner" id="chart-placeholder-inner">
                     <div style="font-size:3rem;opacity:0.2;"></div>
-                    <div style="opacity:0.45;margin-top:0.5rem;">Connect a charting library to display live price data</div>
+                    <div style="opacity:0.45;margin-top:0.5rem;">Click a stock card above to load its chart</div>
                 </div>
             </div>
         </div>
 
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/nav.js"></script>
     <script src="js/dashboard.js"></script>
 </body>

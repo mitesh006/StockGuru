@@ -2,8 +2,9 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 
-const stockRoutes = require("./routes/stock.routes");
-const authRoutes  = require("./routes/auth.routes");
+const stockRoutes     = require("./routes/stock.routes");
+const authRoutes      = require("./routes/auth.routes");
+const watchlistRoutes = require("./routes/watchlist.routes");
 
 const app = express();
 
@@ -24,7 +25,8 @@ connectDB();
 
 // ─── Routes ───
 app.get("/", (req, res) => res.send("StockGuru API is running..."));
-app.use("/api/auth",   authRoutes);
-app.use("/api/stocks", stockRoutes);
+app.use("/api/auth",      authRoutes);
+app.use("/api/stocks",    stockRoutes);
+app.use("/api/watchlist", watchlistRoutes);
 
 module.exports = app;
