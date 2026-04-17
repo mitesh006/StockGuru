@@ -149,6 +149,9 @@ function displayStockData(data) {
 
     // ── Detailed Fundamentals ──
     renderFundamentals(data.annualFundamentals, data.quarterlyFundamentals);
+
+    // ── Smart Insights ──
+    generateInsights(data);
 }
 
 // ─── Detailed Fundamentals (Tabs) ───
@@ -207,6 +210,227 @@ function renderQuarterlyCards(items) {
 function metricRow(label, value, highlight = false) {
     const cls = highlight ? "fund-metric highlight" : "fund-metric";
     return `<div class="${cls}"><span class="fund-metric-label">${label}</span><span class="fund-metric-value">${value}</span></div>`;
+}
+
+// ═══════════════════════════════════════════
+// SMART INSIGHTS ENGINE
+// ═══════════════════════════════════════════
+function generateInsights(data) {
+    const cm = data.currentMetrics || {};
+    const price = data.price;
+    const insights = [];
+
+    // 1. 52-Week Range Position
+    if (price != null && cm.weekHigh52 != null && cm.weekLow52 != null && cm.weekHigh52 !== cm.weekLow52) {
+        const range = cm.weekHigh52 - cm.weekLow52;
+        const position = ((price - cm.weekLow52) / range) * 100;
+        if (position >= 90) {
+            insights.push({
+                icon: '⬆', iconColor: 'green', accent: 'green',
+                title: 'Near 52-Week High',
+                desc: `Trading at <strong>${position.toFixed(0)}%</strong> of its 52-week range — within striking distance of <strong>${fmt(cm.weekHigh52)}</strong>.`,
+                signal: 'Bullish Zone', sigColor: 'green'
+            });
+        } else if (position <= 15) {
+            insights.push({
+                icon: '⬇', iconColor: 'red', accent: 'red',
+                title: 'Near 52-Week Low',
+                desc: `Trading at just <strong>${position.toFixed(0)}%</strong> of its 52-week range — close to the yearly low of <strong>${fmt(cm.weekLow52)}</strong>.`,
+                signal: 'Watch Closely', sigColor: 'red'
+            });
+        } else if (position >= 50) {
+            insights.push({
+                icon: '◈', iconColor: 'blue', accent: 'blue',
+                title: '52-Week Range Position',
+                desc: `Price sits at <strong>${position.toFixed(0)}%</strong> of its yearly range — leaning toward the upper half between <strong>${fmt(cm.weekLow52)}</strong> and <strong>${fmt(cm.weekHigh52)}</strong>.`,
+                signal: 'Above Mid-Range', sigColor: 'blue'
+            });
+        } else {
+            insights.push({
+                icon: '◈', iconColor: 'yellow', accent: 'yellow',
+                title: '52-Week Range Position',
+                desc: `Price sits at <strong>${position.toFixed(0)}%</strong> of its yearly range — in the lower half between <strong>${fmt(cm.weekLow52)}</strong> and <strong>${fmt(cm.weekHigh52)}</strong>.`,
+                signal: 'Below Mid-Range', sigColor: 'yellow'
+            });
+        }
+    }
+
+    // 2. P/E Ratio Valuation
+    if (cm.peRatio != null) {
+        const pe = Number(cm.peRatio);
+        if (pe > 0 && pe < 15) {
+            insights.push({
+                icon: '◎', iconColor: 'green', accent: 'green',
+                title: 'Valuation Looks Attractive',
+                desc: `P/E ratio of <strong>${pe.toFixed(1)}</strong> is below the market average — may indicate undervalued or a value opportunity.`,
+                signal: 'Low P/E', sigColor: 'green'
+            });
+        } else if (pe >= 15 && pe <= 25) {
+            insights.push({
+                icon: '◎', iconColor: 'blue', accent: 'blue',
+                title: 'Fair Valuation',
+                desc: `P/E ratio of <strong>${pe.toFixed(1)}</strong> is within the typical market range — suggests reasonable pricing.`,
+                signal: 'Moderate P/E', sigColor: 'blue'
+            });
+        } else if (pe > 25) {
+            insights.push({
+                icon: '◎', iconColor: 'yellow', accent: 'yellow',
+                title: 'Valuation Appears High',
+                desc: `P/E ratio of <strong>${pe.toFixed(1)}</strong> exceeds market average — could signal high growth expectations or overvaluation.`,
+                signal: 'High P/E', sigColor: 'yellow'
+            });
+        } else if (pe < 0) {
+            insights.push({
+                icon: '◎', iconColor: 'red', accent: 'red',
+                title: 'Negative Earnings',
+                desc: `P/E ratio is <strong>negative</strong> — the company is currently not profitable. Proceed with caution.`,
+                signal: 'Negative P/E', sigColor: 'red'
+            });
+        }
+    }
+
+    // 3. Return on Equity
+    if (cm.roe != null) {
+        const roe = Number(cm.roe);
+        if (roe >= 20) {
+            insights.push({
+                icon: '★', iconColor: 'green', accent: 'green',
+                title: 'Strong Profitability',
+                desc: `ROE of <strong>${roe.toFixed(1)}%</strong> shows the company generates excellent returns on shareholder equity.`,
+                signal: 'High ROE', sigColor: 'green'
+            });
+        } else if (roe >= 10 && roe < 20) {
+            insights.push({
+                icon: '★', iconColor: 'blue', accent: 'blue',
+                title: 'Solid Profitability',
+                desc: `ROE of <strong>${roe.toFixed(1)}%</strong> indicates decent returns on equity — within a healthy range.`,
+                signal: 'Good ROE', sigColor: 'blue'
+            });
+        } else if (roe >= 0 && roe < 10) {
+            insights.push({
+                icon: '★', iconColor: 'yellow', accent: 'yellow',
+                title: 'Modest Profitability',
+                desc: `ROE of <strong>${roe.toFixed(1)}%</strong> is below average — the company may be underutilizing equity.`,
+                signal: 'Low ROE', sigColor: 'yellow'
+            });
+        }
+    }
+
+    // 4. Beta / Volatility
+    if (cm.beta != null) {
+        const beta = Number(cm.beta);
+        if (beta > 1.5) {
+            insights.push({
+                icon: '⚡', iconColor: 'red', accent: 'red',
+                title: 'High Volatility',
+                desc: `Beta of <strong>${beta.toFixed(2)}</strong> means this stock is significantly more volatile than the market — higher risk/reward.`,
+                signal: 'High Beta', sigColor: 'red'
+            });
+        } else if (beta >= 1.0 && beta <= 1.5) {
+            insights.push({
+                icon: '⚡', iconColor: 'yellow', accent: 'yellow',
+                title: 'Above-Average Volatility',
+                desc: `Beta of <strong>${beta.toFixed(2)}</strong> indicates slightly higher volatility than the broader market.`,
+                signal: 'Moderate Beta', sigColor: 'yellow'
+            });
+        } else if (beta >= 0 && beta < 1.0) {
+            insights.push({
+                icon: '⚡', iconColor: 'green', accent: 'green',
+                title: 'Lower Volatility',
+                desc: `Beta of <strong>${beta.toFixed(2)}</strong> suggests this stock is less volatile than the market — more stability.`,
+                signal: 'Low Beta', sigColor: 'green'
+            });
+        }
+    }
+
+    // 5. Net Margin — Business Health
+    if (cm.netMargin != null) {
+        const nm = Number(cm.netMargin);
+        if (nm >= 20) {
+            insights.push({
+                icon: '▣', iconColor: 'green', accent: 'green',
+                title: 'Excellent Margins',
+                desc: `Net margin of <strong>${nm.toFixed(1)}%</strong> indicates a highly profitable business model with strong pricing power.`,
+                signal: 'Premium Margin', sigColor: 'green'
+            });
+        } else if (nm >= 10 && nm < 20) {
+            insights.push({
+                icon: '▣', iconColor: 'blue', accent: 'blue',
+                title: 'Healthy Margins',
+                desc: `Net margin of <strong>${nm.toFixed(1)}%</strong> shows a solid bottom line — typical of a well-run company.`,
+                signal: 'Good Margin', sigColor: 'blue'
+            });
+        } else if (nm >= 0 && nm < 10) {
+            insights.push({
+                icon: '▣', iconColor: 'yellow', accent: 'yellow',
+                title: 'Thin Margins',
+                desc: `Net margin of <strong>${nm.toFixed(1)}%</strong> is on the thinner side — may face pressure in downturns.`,
+                signal: 'Low Margin', sigColor: 'yellow'
+            });
+        } else if (nm < 0) {
+            insights.push({
+                icon: '▣', iconColor: 'red', accent: 'red',
+                title: 'Negative Margins',
+                desc: `Net margin is <strong>${nm.toFixed(1)}%</strong> — the company is losing money on revenue.`,
+                signal: 'Losing Money', sigColor: 'red'
+            });
+        }
+    }
+
+    // 6. Debt-to-Equity
+    if (cm.debtToEquity != null) {
+        const de = Number(cm.debtToEquity);
+        if (de > 2.0) {
+            insights.push({
+                icon: '⬥', iconColor: 'red', accent: 'red',
+                title: 'Heavy Debt Load',
+                desc: `Debt/Equity of <strong>${de.toFixed(2)}</strong> is high — the company relies heavily on debt financing.`,
+                signal: 'High Leverage', sigColor: 'red'
+            });
+        } else if (de >= 0.5 && de <= 2.0) {
+            insights.push({
+                icon: '⬥', iconColor: 'blue', accent: 'blue',
+                title: 'Moderate Leverage',
+                desc: `Debt/Equity of <strong>${de.toFixed(2)}</strong> is within a reasonable range — balanced capital structure.`,
+                signal: 'Balanced Debt', sigColor: 'blue'
+            });
+        } else if (de >= 0 && de < 0.5) {
+            insights.push({
+                icon: '⬥', iconColor: 'green', accent: 'green',
+                title: 'Low Debt',
+                desc: `Debt/Equity of <strong>${de.toFixed(2)}</strong> signals a conservatively financed company with low risk.`,
+                signal: 'Low Leverage', sigColor: 'green'
+            });
+        }
+    }
+
+    // Render insights (cap at 6)
+    const section = document.getElementById('insights-section');
+    const grid = document.getElementById('insights-grid');
+    const badge = document.getElementById('insights-badge');
+
+    if (insights.length === 0 || !section || !grid) return;
+
+    const capped = insights.slice(0, 6);
+    badge.textContent = `${capped.length} Signals`;
+    grid.innerHTML = capped.map(renderInsightCard).join('');
+    section.style.display = 'block';
+}
+
+function renderInsightCard(ins) {
+    return `
+        <div class="insight-card accent-${ins.accent}">
+            <div class="insight-header">
+                <div class="insight-icon icon-${ins.iconColor}">${ins.icon}</div>
+                <div class="insight-title">${ins.title}</div>
+            </div>
+            <div class="insight-desc">${ins.desc}</div>
+            <div class="insight-signal">
+                <span class="signal-dot dot-${ins.sigColor}"></span>
+                <span class="signal-label sig-${ins.sigColor}">${ins.signal}</span>
+            </div>
+        </div>
+    `;
 }
 
 // ═══════════════════════════════════════════
