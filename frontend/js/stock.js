@@ -13,12 +13,12 @@ document.title = `${symbol} - StockGuru`;
 // CLIENT-SIDE CACHES
 // ═══════════════════════════════════════════
 let stockDetailsCache = null;          // Cache for current stock's detail data
-let chartDataCache    = new Map();     // key: period → { points, stale, ts }
+let chartDataCache = new Map();     // key: period → { points, stale, ts }
 const CHART_CLIENT_TTL = 5 * 60 * 1000; // 5 min
 let fetchingDetails = false;           // Guard against duplicate detail fetches
-let chartAbort      = null;            // AbortController for chart requests
-let activePeriod    = null;            // Currently loaded chart period
-let currentHorizon  = 'short';         // Investment horizon: 'short' | 'long'
+let chartAbort = null;            // AbortController for chart requests
+let activePeriod = null;            // Currently loaded chart period
+let currentHorizon = 'short';         // Investment horizon: 'short' | 'long'
 
 // ─── Auth helper ───
 function getAuthToken() {
@@ -40,7 +40,7 @@ const HORIZON_CHART_PERIOD = { short: '1M', long: '1Y' };
 // Insight category priorities per mode (lower index = higher priority)
 const HORIZON_INSIGHT_PRIORITY = {
     short: ['momentum', 'range', 'volatility', 'valuation', 'profitability', 'leverage'],
-    long:  ['valuation', 'profitability', 'leverage', 'margin', 'range', 'momentum', 'volatility']
+    long: ['valuation', 'profitability', 'leverage', 'margin', 'range', 'momentum', 'volatility']
 };
 
 /** Read the saved horizon from localStorage. */
@@ -60,8 +60,8 @@ function setHorizon(mode) {
 /** Update the toggle button states and slider position. */
 function updateHorizonUI(mode) {
     const btnShort = document.getElementById('horizon-btn-short');
-    const btnLong  = document.getElementById('horizon-btn-long');
-    const slider   = document.getElementById('horizon-slider');
+    const btnLong = document.getElementById('horizon-btn-long');
+    const slider = document.getElementById('horizon-slider');
     if (!btnShort || !btnLong || !slider) return;
 
     btnShort.classList.toggle('active', mode === 'short');
@@ -130,8 +130,8 @@ async function loadStockDetails() {
             const msg = result.errorType === "RATE_LIMIT"
                 ? "API rate limit reached. Please wait a moment and refresh."
                 : result.errorType === "INVALID_SYMBOL"
-                ? `"${symbol}" is not a valid or supported stock symbol.`
-                : result.message || "Failed to load stock data";
+                    ? `"${symbol}" is not a valid or supported stock symbol.`
+                    : result.message || "Failed to load stock data";
             showError(msg);
             return;
         }
@@ -424,7 +424,7 @@ function generateInsights(data) {
         const beta = Number(cm.beta);
         if (beta > 1.5) {
             insights.push({
-                icon: '⚡', iconColor: 'red', accent: 'red',
+                icon: '⚡︎', iconColor: 'red', accent: 'red',
                 title: 'High Volatility',
                 desc: `Beta of <strong>${beta.toFixed(2)}</strong> means this stock is significantly more volatile than the market — higher risk/reward.`,
                 signal: 'High Beta', sigColor: 'red',
@@ -432,7 +432,7 @@ function generateInsights(data) {
             });
         } else if (beta >= 1.0 && beta <= 1.5) {
             insights.push({
-                icon: '⚡', iconColor: 'yellow', accent: 'yellow',
+                icon: '⚡︎', iconColor: 'yellow', accent: 'yellow',
                 title: 'Above-Average Volatility',
                 desc: `Beta of <strong>${beta.toFixed(2)}</strong> indicates slightly higher volatility than the broader market.`,
                 signal: 'Moderate Beta', sigColor: 'yellow',
@@ -440,7 +440,7 @@ function generateInsights(data) {
             });
         } else if (beta >= 0 && beta < 1.0) {
             insights.push({
-                icon: '⚡', iconColor: 'green', accent: 'green',
+                icon: '⚡︎', iconColor: 'green', accent: 'green',
                 title: 'Lower Volatility',
                 desc: `Beta of <strong>${beta.toFixed(2)}</strong> suggests this stock is less volatile than the market — more stability.`,
                 signal: 'Low Beta', sigColor: 'green',
@@ -913,14 +913,14 @@ async function fetchAndRenderChart(period = '1M') {
         chartAbort = null;
     }
 
-    const loader  = document.getElementById("chart-loader");
+    const loader = document.getElementById("chart-loader");
     const errorEl = document.getElementById("chart-error");
-    const canvas  = document.getElementById("priceChart");
+    const canvas = document.getElementById("priceChart");
 
     // Show loading state
-    if (loader)  loader.style.display = "flex";
+    if (loader) loader.style.display = "flex";
     if (errorEl) errorEl.style.display = "none";
-    if (canvas)  canvas.style.opacity = "0.3";
+    if (canvas) canvas.style.opacity = "0.3";
 
     const controller = new AbortController();
     chartAbort = controller;
@@ -967,7 +967,7 @@ async function fetchAndRenderChart(period = '1M') {
 }
 
 function applyChartData(points, stale = false) {
-    const canvas  = document.getElementById("priceChart");
+    const canvas = document.getElementById("priceChart");
     const errorEl = document.getElementById("chart-error");
 
     // Hide error if previously shown
@@ -1139,19 +1139,19 @@ function showToast(msg) {
  * @param {string} sym - Stock ticker symbol
  */
 async function loadPrediction(sym) {
-    const section  = document.getElementById('prediction-section');
-    const loader   = document.getElementById('prediction-loader');
-    const grid     = document.getElementById('prediction-grid');
-    const errorEl  = document.getElementById('prediction-error');
-    const noteEl   = document.getElementById('prediction-note');
+    const section = document.getElementById('prediction-section');
+    const loader = document.getElementById('prediction-loader');
+    const grid = document.getElementById('prediction-grid');
+    const errorEl = document.getElementById('prediction-error');
+    const noteEl = document.getElementById('prediction-note');
     if (!section) return;
 
     // Show section with loading shimmer
     section.style.display = 'block';
-    loader.style.display  = 'block';
-    grid.style.display    = 'none';
+    loader.style.display = 'block';
+    grid.style.display = 'none';
     errorEl.style.display = 'none';
-    noteEl.style.display  = 'none';
+    noteEl.style.display = 'none';
 
     try {
         const mode = currentHorizon || 'short';
@@ -1178,47 +1178,47 @@ async function loadPrediction(sym) {
  * @param {Object} data - Prediction response from API
  */
 function renderPrediction(data) {
-    const grid   = document.getElementById('prediction-grid');
+    const grid = document.getElementById('prediction-grid');
     const noteEl = document.getElementById('prediction-note');
     if (!grid) return;
 
     // ── Trend ──
-    const trendEl    = document.getElementById('pred-trend');
-    const trendSub   = document.getElementById('pred-trend-sub');
-    const trendTile  = document.getElementById('pred-tile-trend');
-    const trend      = (data.trend || 'Sideways').toLowerCase();
+    const trendEl = document.getElementById('pred-trend');
+    const trendSub = document.getElementById('pred-trend-sub');
+    const trendTile = document.getElementById('pred-tile-trend');
+    const trend = (data.trend || 'Sideways').toLowerCase();
 
     // Clear old trend classes
     trendTile.classList.remove('trend-bullish', 'trend-bearish', 'trend-sideways');
 
     if (trend === 'bullish') {
         trendEl.textContent = '▲ Bullish';
-        trendEl.className   = 'pred-tile-value val-green';
+        trendEl.className = 'pred-tile-value val-green';
         trendSub.textContent = 'Upward signal';
         trendTile.classList.add('trend-bullish');
     } else if (trend === 'bearish') {
         trendEl.textContent = '▼ Bearish';
-        trendEl.className   = 'pred-tile-value val-red';
+        trendEl.className = 'pred-tile-value val-red';
         trendSub.textContent = 'Downward signal';
         trendTile.classList.add('trend-bearish');
     } else {
         trendEl.textContent = '◆ Sideways';
-        trendEl.className   = 'pred-tile-value val-yellow';
+        trendEl.className = 'pred-tile-value val-yellow';
         trendSub.textContent = 'No clear direction';
         trendTile.classList.add('trend-sideways');
     }
 
     // ── Predicted Price ──
-    const priceEl  = document.getElementById('pred-price');
+    const priceEl = document.getElementById('pred-price');
     const priceSub = document.getElementById('pred-price-sub');
     priceEl.textContent = fmt(data.predictedPrice);
-    priceEl.className   = 'pred-tile-value';
+    priceEl.className = 'pred-tile-value';
 
     // Compare with current price if available
     if (stockDetailsCache && stockDetailsCache.price != null) {
         const curr = stockDetailsCache.price;
         const diff = data.predictedPrice - curr;
-        const pct  = ((diff / curr) * 100).toFixed(2);
+        const pct = ((diff / curr) * 100).toFixed(2);
         const sign = diff >= 0 ? '+' : '';
         priceSub.textContent = `${sign}${pct}% from current`;
         priceEl.className = `pred-tile-value ${diff >= 0 ? 'val-green' : 'val-red'}`;
@@ -1228,7 +1228,7 @@ function renderPrediction(data) {
     }
 
     // ── Expected Range ──
-    const rangeEl  = document.getElementById('pred-range');
+    const rangeEl = document.getElementById('pred-range');
     const rangeSub = document.getElementById('pred-range-sub');
     if (data.predictedRange) {
         rangeEl.textContent = `${fmt(data.predictedRange.low)} — ${fmt(data.predictedRange.high)}`;
@@ -1240,9 +1240,9 @@ function renderPrediction(data) {
     }
 
     // ── Confidence ──
-    const confEl   = document.getElementById('pred-confidence');
+    const confEl = document.getElementById('pred-confidence');
     const confFill = document.getElementById('pred-confidence-fill');
-    const conf     = data.confidence || 0;
+    const conf = data.confidence || 0;
     confEl.textContent = `${conf}%`;
 
     // Color-code confidence
@@ -1265,8 +1265,8 @@ function renderPrediction(data) {
     });
 
     // Show grid and note
-    grid.style.display   = 'grid';
-    noteEl.style.display  = 'block';
+    grid.style.display = 'grid';
+    noteEl.style.display = 'block';
 
     // Update note text based on mode
     if (data.explanation) {
@@ -1291,14 +1291,14 @@ function renderPrediction(data) {
  */
 function showPredictionError(message) {
     const errorEl = document.getElementById('prediction-error');
-    const msgEl   = document.getElementById('prediction-error-msg');
-    const grid    = document.getElementById('prediction-grid');
-    const noteEl  = document.getElementById('prediction-note');
+    const msgEl = document.getElementById('prediction-error-msg');
+    const grid = document.getElementById('prediction-grid');
+    const noteEl = document.getElementById('prediction-note');
 
-    if (grid)    grid.style.display    = 'none';
-    if (noteEl)  noteEl.style.display  = 'none';
+    if (grid) grid.style.display = 'none';
+    if (noteEl) noteEl.style.display = 'none';
     if (errorEl) errorEl.style.display = 'flex';
-    if (msgEl)   msgEl.textContent     = message;
+    if (msgEl) msgEl.textContent = message;
 }
 
 // ═══════════════════════════════════════════

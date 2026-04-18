@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
     <link rel="stylesheet" href="css/stock.css">
     <link rel="icon" href="favicon.ico">
 </head>
+
 <body>
     <!-- Navigation -->
     <nav>
@@ -60,7 +62,7 @@
                 <div class="horizon-label">Investment Horizon</div>
                 <div class="horizon-toggle" id="horizon-toggle">
                     <button class="horizon-btn active" data-mode="short" id="horizon-btn-short">
-                        <span class="horizon-icon">⚡</span> Short-Term
+                        <span class="horizon-icon">⚡︎</span> Short-Term
                     </button>
                     <button class="horizon-btn" data-mode="long" id="horizon-btn-long">
                         <span class="horizon-icon">◆</span> Long-Term
@@ -84,7 +86,7 @@
             <div class="chart-area" id="stock-chart">
                 <!-- Canvas for Chart.js -->
                 <canvas id="priceChart"></canvas>
-                
+
                 <!-- Fallback/Loading states -->
                 <div class="chart-loader" id="chart-loader" style="display: none;">
                     <div class="spinner-small"></div>
@@ -147,21 +149,34 @@
             <div class="section-heading">Key Statistics</div>
             <div class="key-stats-grid">
                 <div class="key-stats-col">
-                    <div class="ks-row highlight"><span class="ks-label">P/E Ratio</span><span class="ks-value" id="ks-pe">—</span></div>
-                    <div class="ks-row highlight"><span class="ks-label">EPS</span><span class="ks-value" id="ks-eps">—</span></div>
-                    <div class="ks-row highlight"><span class="ks-label">ROE</span><span class="ks-value" id="ks-roe">—</span></div>
-                    <div class="ks-row"><span class="ks-label">ROA</span><span class="ks-value" id="ks-roa">—</span></div>
-                    <div class="ks-row"><span class="ks-label">Net Margin</span><span class="ks-value" id="ks-nm">—</span></div>
-                    <div class="ks-row"><span class="ks-label">Op. Margin</span><span class="ks-value" id="ks-om">—</span></div>
-                    <div class="ks-row"><span class="ks-label">Book Value</span><span class="ks-value" id="ks-bv">—</span></div>
+                    <div class="ks-row highlight"><span class="ks-label">P/E Ratio</span><span class="ks-value"
+                            id="ks-pe">—</span></div>
+                    <div class="ks-row highlight"><span class="ks-label">EPS</span><span class="ks-value"
+                            id="ks-eps">—</span></div>
+                    <div class="ks-row highlight"><span class="ks-label">ROE</span><span class="ks-value"
+                            id="ks-roe">—</span></div>
+                    <div class="ks-row"><span class="ks-label">ROA</span><span class="ks-value" id="ks-roa">—</span>
+                    </div>
+                    <div class="ks-row"><span class="ks-label">Net Margin</span><span class="ks-value"
+                            id="ks-nm">—</span></div>
+                    <div class="ks-row"><span class="ks-label">Op. Margin</span><span class="ks-value"
+                            id="ks-om">—</span></div>
+                    <div class="ks-row"><span class="ks-label">Book Value</span><span class="ks-value"
+                            id="ks-bv">—</span></div>
                 </div>
                 <div class="key-stats-col">
-                    <div class="ks-row"><span class="ks-label">Market Cap</span><span class="ks-value" id="ks-mcap">—</span></div>
-                    <div class="ks-row"><span class="ks-label">Beta</span><span class="ks-value" id="ks-beta">—</span></div>
-                    <div class="ks-row"><span class="ks-label">52W High</span><span class="ks-value green" id="ks-52h">—</span></div>
-                    <div class="ks-row"><span class="ks-label">52W Low</span><span class="ks-value red" id="ks-52l">—</span></div>
-                    <div class="ks-row"><span class="ks-label">Current Ratio</span><span class="ks-value" id="ks-cr">—</span></div>
-                    <div class="ks-row"><span class="ks-label">Debt/Equity</span><span class="ks-value" id="ks-de">—</span></div>
+                    <div class="ks-row"><span class="ks-label">Market Cap</span><span class="ks-value"
+                            id="ks-mcap">—</span></div>
+                    <div class="ks-row"><span class="ks-label">Beta</span><span class="ks-value" id="ks-beta">—</span>
+                    </div>
+                    <div class="ks-row"><span class="ks-label">52W High</span><span class="ks-value green"
+                            id="ks-52h">—</span></div>
+                    <div class="ks-row"><span class="ks-label">52W Low</span><span class="ks-value red"
+                            id="ks-52l">—</span></div>
+                    <div class="ks-row"><span class="ks-label">Current Ratio</span><span class="ks-value"
+                            id="ks-cr">—</span></div>
+                    <div class="ks-row"><span class="ks-label">Debt/Equity</span><span class="ks-value"
+                            id="ks-de">—</span></div>
                 </div>
             </div>
         </div>
@@ -297,4 +312,5 @@
     <script src="js/nav.js"></script>
     <script src="js/stock.js"></script>
 </body>
+
 </html>
