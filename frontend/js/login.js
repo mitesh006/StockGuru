@@ -2,8 +2,8 @@
 
 const API_BASE = "http://localhost:3000/api";
 
-const form     = document.getElementById("login-form");
-const errorEl  = document.getElementById("error-msg");
+const form = document.getElementById("login-form");
+const errorEl = document.getElementById("error-msg");
 const loginBtn = document.getElementById("login-btn");
 
 // Toggle password visibility
@@ -32,17 +32,17 @@ form.addEventListener("submit", async function (e) {
     e.preventDefault();
     hideError();
 
-    const email    = document.getElementById("email").value.trim();
+    const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
 
     loginBtn.textContent = "Signing In...";
     loginBtn.disabled = true;
 
     try {
-        const res  = await fetch(`${API_BASE}/auth/login`, {
-            method:  "POST",
+        const res = await fetch(`${API_BASE}/auth/login`, {
+            method: "POST",
             headers: { "Content-Type": "application/json" },
-            body:    JSON.stringify({ email, password }),
+            body: JSON.stringify({ email, password }),
         });
         const data = await res.json();
 
@@ -53,7 +53,7 @@ form.addEventListener("submit", async function (e) {
 
         // Store token and user in localStorage
         localStorage.setItem("token", data.token);
-        localStorage.setItem("user",  JSON.stringify(data.user));
+        localStorage.setItem("user", JSON.stringify(data.user));
 
         // Redirect to dashboard
         window.location.href = "dashboard.html";

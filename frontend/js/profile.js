@@ -12,7 +12,7 @@ async function loadProfile() {
     }
 
     try {
-        const res  = await fetch(`${API_BASE}/auth/me`, {
+        const res = await fetch(`${API_BASE}/auth/me`, {
             headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -36,18 +36,18 @@ async function loadProfile() {
 function renderProfile(user) {
     // Hide loading, show card
     document.getElementById("profile-loading").style.display = "none";
-    document.getElementById("profile-card").style.display    = "block";
+    document.getElementById("profile-card").style.display = "block";
 
     // Avatar: first letter of name
     document.getElementById("profile-avatar").textContent =
         (user.name || "U").charAt(0).toUpperCase();
 
     // Header
-    document.getElementById("profile-name").textContent  = user.name;
+    document.getElementById("profile-name").textContent = user.name;
     document.getElementById("profile-email").textContent = user.email;
 
     // Detail rows
-    document.getElementById("pd-name").textContent  = user.name;
+    document.getElementById("pd-name").textContent = user.name;
     document.getElementById("pd-email").textContent = user.email;
     document.getElementById("pd-since").textContent = formatDate(user.createdAt);
 

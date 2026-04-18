@@ -242,7 +242,6 @@ function displayStockData(data) {
 
     // ── Analysis Panels ──
     generateInsights(data);
-    renderOverallSignal(data);
     renderDecisionPanel(data);
 }
 
@@ -559,94 +558,6 @@ function renderInsightCard(ins) {
 // ═══════════════════════════════════════════
 // OVERALL SIGNAL ENGINE
 // ═══════════════════════════════════════════
-function renderOverallSignal(data) {
-    const cm = data.currentMetrics || {};
-    const section = document.getElementById('overall-signal');
-    if (!section) return;
-
-    // Scoring system: each factor contributes +1 (bullish), 0 (neutral), or -1 (bearish)
-    let score = 0;
-    let factors = 0;
-
-    // Price vs previous close
-    if (data.price != null && data.previousClose != null) {
-        const changePct = ((data.price - data.previousClose) / data.previousClose) * 100;
-        if (changePct > 1) { score += 1; } else if (changePct < -1) { score -= 1; }
-        factors++;
-    }
-
-    // 52-week range position
-    if (data.price != null && cm.weekHigh52 != null && cm.weekLow52 != null && cm.weekHigh52 !== cm.weekLow52) {
-        const pos = ((data.price - cm.weekLow52) / (cm.weekHigh52 - cm.weekLow52)) * 100;
-        if (pos >= 70) { score += 1; } else if (pos <= 30) { score -= 1; }
-        factors++;
-    }
-
-    // P/E Ratio
-    if (cm.peRatio != null) {
-        const pe = Number(cm.peRatio);
-        if (pe > 0 && pe < 20) { score += 1; } else if (pe > 35 || pe < 0) { score -= 1; }
-        factors++;
-    }
-
-    // ROE
-    if (cm.roe != null) {
-        const roe = Number(cm.roe);
-        if (roe >= 15) { score += 1; } else if (roe < 5) { score -= 1; }
-        factors++;
-    }
-
-    // Net Margin
-    if (cm.netMargin != null) {
-        const nm = Number(cm.netMargin);
-        if (nm >= 15) { score += 1; } else if (nm < 0) { score -= 1; }
-        factors++;
-    }
-
-    // Beta
-    if (cm.beta != null) {
-        const beta = Number(cm.beta);
-        if (beta >= 0.5 && beta <= 1.2) { score += 1; } else if (beta > 2.0) { score -= 1; }
-        factors++;
-    }
-
-    // Debt/Equity
-    if (cm.debtToEquity != null) {
-        const de = Number(cm.debtToEquity);
-        if (de < 1.0) { score += 1; } else if (de > 2.5) { score -= 1; }
-        factors++;
-    }
-
-    if (factors === 0) return;
-
-    // Normalize score to -1...+1 range
-    const normalized = score / factors;
-    const confidence = Math.min(Math.round(Math.abs(normalized) * 100), 95);
-
-    let verdict, sigClass, icon;
-    if (normalized > 0.15) {
-        verdict = 'Bullish';
-        sigClass = 'sig-bullish';
-        icon = '▲';
-    } else if (normalized < -0.15) {
-        verdict = 'Bearish';
-        sigClass = 'sig-bearish';
-        icon = '▼';
-    } else {
-        verdict = 'Neutral';
-        sigClass = 'sig-neutral';
-        icon = '◆';
-    }
-
-    section.className = `overall-signal ${sigClass}`;
-    document.getElementById('signal-icon-lg').textContent = icon;
-    const modeLabel = currentHorizon === 'long' ? 'Long-Term Signal' : 'Short-Term Signal';
-    document.getElementById('signal-headline').textContent = modeLabel;
-    document.getElementById('signal-verdict').textContent = verdict;
-    document.getElementById('confidence-fill').style.width = `${confidence}%`;
-    document.getElementById('confidence-pct').textContent = `${confidence}%`;
-    section.style.display = 'block';
-}
 
 // ═══════════════════════════════════════════
 // QUICK DECISION PANEL
@@ -983,8 +894,8 @@ function applyChartData(points, stale = false) {
     if (titleEl) {
         const baseName = stockDetailsCache?.company?.name || symbol;
         titleEl.textContent = stale
-            ? `📈 ${baseName} (cached)`
-            : `📈 ${baseName}`;
+            ? ` ${baseName} (cached)`
+            : ` ${baseName}`;
     }
 
     // Update Chart Intelligence panel
@@ -1127,7 +1038,7 @@ function showToast(msg) {
     if (!toast) return;
     toast.textContent = msg;
     toast.classList.add("show");
-    setTimeout(() => toast.classList.remove("show"), 3000);
+    setTimeout(() => toast.classList.remove("show"), 8000);
 }
 
 // ═══════════════════════════════════════════
@@ -1281,7 +1192,7 @@ function renderPrediction(data) {
     // Update prediction badge to show mode
     const badgeEl = document.getElementById('prediction-badge');
     if (badgeEl) {
-        badgeEl.textContent = data.mode === 'long' ? 'AI · LONG' : 'AI · SHORT';
+        badgeEl.textContent = data.mode === 'long' ? 'LONG' : 'SHORT';
     }
 }
 

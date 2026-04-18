@@ -2,9 +2,9 @@
 
 const API_BASE = "http://localhost:3000/api";
 
-const form       = document.getElementById("register-form");
-const errorEl    = document.getElementById("error-msg");
-const successEl  = document.getElementById("success-msg");
+const form = document.getElementById("register-form");
+const errorEl = document.getElementById("error-msg");
+const successEl = document.getElementById("success-msg");
 const registerBtn = document.getElementById("register-btn");
 
 // If already logged in, skip to dashboard
@@ -14,13 +14,13 @@ if (localStorage.getItem("token")) {
 
 // Toggle password visibility
 document.getElementById("toggle-pwd").addEventListener("click", function () {
-    const pwd  = document.getElementById("password");
+    const pwd = document.getElementById("password");
     const icon = document.getElementById("eye-icon");
     pwd.type = pwd.type === "password" ? "text" : "password";
     if (icon) icon.classList.toggle("hidden", pwd.type === "text");
 });
 document.getElementById("toggle-pwd2").addEventListener("click", function () {
-    const pwd  = document.getElementById("confirm-password");
+    const pwd = document.getElementById("confirm-password");
     const icon = document.getElementById("eye-icon2");
     pwd.type = pwd.type === "password" ? "text" : "password";
     if (icon) icon.classList.toggle("hidden", pwd.type === "text");
@@ -33,7 +33,7 @@ function showError(msg) {
     successEl.style.display = "none";
 }
 function hideMessages() {
-    errorEl.style.display   = "none";
+    errorEl.style.display = "none";
     successEl.style.display = "none";
 }
 
@@ -61,24 +61,24 @@ form.addEventListener("submit", async function (e) {
     e.preventDefault();
     hideMessages();
 
-    const name     = document.getElementById("fullname").value.trim();
-    const email    = document.getElementById("email").value.trim();
+    const name = document.getElementById("fullname").value.trim();
+    const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
-    const confirm  = document.getElementById("confirm-password").value;
+    const confirm = document.getElementById("confirm-password").value;
 
     // Frontend validation
-    if (!name)                  return showError("Full name is required.");
-    if (password.length < 6)   return showError("Password must be at least 6 characters.");
-    if (password !== confirm)   return showError("Passwords do not match.");
+    if (!name) return showError("Full name is required.");
+    if (password.length < 6) return showError("Password must be at least 6 characters.");
+    if (password !== confirm) return showError("Passwords do not match.");
 
     registerBtn.textContent = "Creating account…";
     registerBtn.disabled = true;
 
     try {
-        const res  = await fetch(`${API_BASE}/auth/register`, {
-            method:  "POST",
+        const res = await fetch(`${API_BASE}/auth/register`, {
+            method: "POST",
             headers: { "Content-Type": "application/json" },
-            body:    JSON.stringify({ name, email, password }),
+            body: JSON.stringify({ name, email, password }),
         });
         const data = await res.json();
 
