@@ -29,7 +29,7 @@
         <div class="spinner"></div>
         <div class="loading-text">Fetching stock data…</div>
     </div>
-    <!-- ═══ INVESTMENT HORIZON TOGGLE ═══ -->
+    <!-- Investment Horizon Toggle -->
     <div class="horizon-control" id="horizon-control">
         <div class="horizon-label">Investment Horizon</div>
         <div class="horizon-toggle" id="horizon-toggle">
@@ -43,7 +43,7 @@
         </div>
     </div>
     <div class="container">
-        <!-- ═══ 1. HERO CARD ═══ -->
+        <!-- Hero -->
         <div class="stock-hero" id="stock-hero">
             <div class="hero-top">
                 <div class="stock-identity">
@@ -71,7 +71,7 @@
                 </button>
             </div>
         </div>
-        <!-- ═══ 2. CHART SECTION (PREMIUM) ═══ -->
+        <!-- Chart -->
         <div class="chart-section" id="chart-section">
             <div class="chart-header">
                 <h2 class="chart-title" id="chart-title">Price Chart</h2>
@@ -84,10 +84,7 @@
                 </div>
             </div>
             <div class="chart-area" id="stock-chart">
-                <!-- Canvas for Chart.js -->
                 <canvas id="priceChart"></canvas>
-
-                <!-- Fallback/Loading states -->
                 <div class="chart-loader" id="chart-loader" style="display: none;">
                     <div class="spinner-small"></div>
                     <div>Loading historical data...</div>
@@ -97,7 +94,7 @@
                     <div id="chart-error-msg">No data available for this period.</div>
                 </div>
             </div>
-            <!-- ═══ 3. COMPACT STATS ROW ═══ -->
+            <!-- Stats Row -->
             <div class="stats-row" id="stats-row">
                 <div class="stat-card-compact">
                     <span class="stat-label">Open</span>
@@ -120,7 +117,7 @@
                     <span class="stat-value" id="stat-volume">—</span>
                 </div>
             </div>
-            <!-- ═══ 2b. CHART INTELLIGENCE PANEL ═══ -->
+            <!-- Chart Intelligence -->
             <div class="chart-intel" id="chart-intel" style="display:none;">
                 <div class="intel-tile" id="intel-trend">
                     <div class="intel-label">Trend</div>
@@ -144,23 +141,22 @@
                 </div>
             </div>
         </div>
-        <!-- ═══ 5. OVERALL SIGNAL BANNER ═══ -->
-        <!-- ═══ 6. SMART INSIGHTS ═══ -->
+        <!-- Smart Insights -->
         <div class="insights-section" id="insights-section" style>
             <div class="section-heading">Key Insights
                 <span class="insights-badge" id="insights-badge"></span>
             </div>
             <div class="insights-grid" id="insights-grid">
-                <!-- Insight cards are injected by JS -->
+
             </div>
         </div>
-        <!-- ═══ 7. ML PREDICTION ═══ -->
+        <!-- ML Prediction -->
         <div class="prediction-section" id="prediction-section" style="display:none;">
             <div class="section-heading">Price Forecast
                 <span class="prediction-badge" id="prediction-badge"></span>
             </div>
             
-            <!-- Loading state -->
+
             <div class="prediction-loader" id="prediction-loader" style="display:none;">
                 <div class="pred-shimmer-grid">
                     <div class="pred-shimmer"></div>
@@ -170,13 +166,13 @@
                 </div>
             </div>
             
-            <!-- Error state -->
+
             <div class="prediction-error" id="prediction-error" style="display:none;">
                 <div class="pred-error-icon">!</div>
                 <div class="pred-error-msg" id="prediction-error-msg">Prediction unavailable.</div>
             </div>
             
-            <!-- Data tiles -->
+
             <div class="prediction-grid" id="prediction-grid" style="display:none;">
                 <div class="pred-tile" id="pred-tile-trend">
                     <div class="pred-tile-label">Trend</div>
@@ -207,7 +203,7 @@
             </div>
         </div>
         
-        <!-- ═══ 8. QUICK DECISION PANEL ═══ -->
+        <!-- Quick Decision Panel -->
         <div class="decision-panel" id="decision-panel" style="display:none;">
             <div class="section-heading">Quick Decision Summary
             </div>
@@ -217,7 +213,7 @@
                         <span class="decision-dot dot-green"></span> Strengths
                     </div>
                     <ul class="decision-list" id="strengths-list">
-                        <!-- Injected by JS -->
+
                     </ul>
                 </div>
                 <div class="decision-col">
@@ -225,18 +221,18 @@
                         <span class="decision-dot dot-red"></span> Risks
                     </div>
                     <ul class="decision-list" id="risks-list">
-                        <!-- Injected by JS -->
+
                     </ul>
                 </div>
             </div>
             <div class="decision-conclusion" id="decision-conclusion">
-                <!-- Injected by JS -->
+
             </div>
         </div>
-        <!-- ═══ 8. DETAILED FUNDAMENTALS ═══ -->
+        <!-- Fundamentals -->
         <div class="fundamentals-section" id="fundamentals-section">
             <div class="section-heading">Fundamentals</div>
-            <!-- ═══ 4. KEY STATISTICS ═══ -->
+
             <div class="key-stats-section" id="key-stats-section">
                 <div class="section-heading">Key Statistics</div>
                 <div class="key-stats-grid">

@@ -12,7 +12,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ─── MongoDB Connection ───
 const connectDB = async () => {
     try {
         await mongoose.connect(process.env.MONGODB_URI);
@@ -24,10 +23,9 @@ const connectDB = async () => {
 };
 connectDB();
 
-// ─── Routes ───
 app.get("/", (req, res) => res.send("StockGuru API is running..."));
 app.use("/api/auth",      authRoutes);
-app.use("/api/stocks",    predictionRoutes);   // must be before stockRoutes (/:symbol catch-all)
+app.use("/api/stocks",    predictionRoutes);  // before stockRoutes (/:symbol catch-all)
 app.use("/api/stocks",    stockRoutes);
 app.use("/api/watchlist", watchlistRoutes);
 

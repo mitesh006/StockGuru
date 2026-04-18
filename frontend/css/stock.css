@@ -1,8 +1,6 @@
-/* ===== Stock Detail Page ===== */
+/* Stock Detail Page */
 
-/* ═══════════════════════════════
-      INVESTMENT HORIZON TOGGLE
-   ═══════════════════════════════ */
+/* Investment Horizon Toggle */
 .horizon-control {
     position: sticky;
     top: 1rem;
@@ -13,8 +11,7 @@
     float: right;
     margin-top: 1rem;
     margin-right: 2rem;
-    /*reclaim the vertical space so it doesn't push content*/
-    margin-bottom: -60px;   
+    margin-bottom: -60px; /* reclaim vertical space so it doesn't push content */
     width: fit-content;
     background: rgba(20, 25, 32, 0.92);
     backdrop-filter: blur(16px);
@@ -83,15 +80,10 @@
     font-size: 0.75rem;
     line-height: 1;
 }
-.horizon-icon.icon-yellow {
-    color: var(--accent-yellow);
-}
-.horizon-icon.icon-blue {
-    color: var(--accent-blue);
-}
+.horizon-icon.icon-yellow { color: var(--accent-yellow); }
+.horizon-icon.icon-blue   { color: var(--accent-blue); }
 
-
-/* ── Hero ── */
+/* Hero */
 .stock-hero {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -189,8 +181,7 @@
     box-shadow: var(--glow-green);
 }
 
-
-
+/* Chart */
 .chart-section {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -264,13 +255,9 @@
     overflow: hidden;
 }
 
-/* Loader & Error inside chart */
 .chart-loader, .chart-error {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -283,8 +270,7 @@
 }
 
 .spinner-small {
-    width: 32px;
-    height: 32px;
+    width: 32px; height: 32px;
     border: 3px solid rgba(0, 255, 136, 0.1);
     border-top-color: var(--accent-green);
     border-radius: 50%;
@@ -292,8 +278,7 @@
 }
 
 .error-icon {
-    width: 48px;
-    height: 48px;
+    width: 48px; height: 48px;
     background: rgba(255, 51, 102, 0.1);
     color: var(--accent-red);
     border-radius: 50%;
@@ -310,9 +295,8 @@
     font-size: 0.9rem;
     font-family: 'Courier New', monospace;
 }
-/* ═══════════════════════════════
-   2b. COMPACT STATS ROW
-   ═══════════════════════════════ */
+
+/* Stats Row */
 .stats-row {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -321,7 +305,7 @@
     animation: fadeIn 0.6s ease-out 0.25s both;
     border: 1px solid var(--border-color);
     overflow: hidden;
-    border-radius: 10px; 
+    border-radius: 10px;
 }
 
 .stat-card-compact {
@@ -329,16 +313,10 @@
     border-right: 1px solid var(--border-color);
     text-align: center;
     transition: background 0.2s ease;
-
 }
 
-.stat-card-compact:last-child {
-    border-right: none;
-}
-
-.stat-card-compact:hover {
-    background: var(--bg-tertiary);
-}
+.stat-card-compact:last-child { border-right: none; }
+.stat-card-compact:hover { background: var(--bg-tertiary); }
 
 .stat-label {
     font-size: 0.7rem;
@@ -356,9 +334,7 @@
 .stat-value.green { color: var(--accent-green); }
 .stat-value.red   { color: var(--accent-red); }
 
-/* ═══════════════════════════════
-2c. CHART INTELLIGENCE PANEL
-═══════════════════════════════ */
+/* Chart Intelligence Panel */
 .chart-intel {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -379,10 +355,7 @@
 }
 
 .intel-tile:last-child { border-right: none; }
-
-.intel-tile:hover {
-    background: var(--bg-tertiary);
-}
+.intel-tile:hover { background: var(--bg-tertiary); }
 
 .intel-label {
     font-size: 0.75rem;
@@ -412,10 +385,7 @@
     line-height: 1.4;
 }
 
-
-/* ═══════════════════════════════
-   4. KEY STATISTICS
-   ═══════════════════════════════ */
+/* Key Statistics */
 .key-stats-section {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -458,33 +428,25 @@
 
 .ks-row:last-child { border-bottom: none; }
 
-.ks-label {
-    color: var(--text-secondary);
-}
+.ks-label { color: var(--text-secondary); }
 
 .ks-value {
     font-weight: bold;
     color: var(--text-primary);
 }
-
 .ks-value.green { color: var(--accent-green); }
 .ks-value.red   { color: var(--accent-red); }
 
-/* Highlighted rows for key metrics */
 .ks-row.highlight .ks-label {
     color: var(--accent-blue);
     font-weight: 600;
 }
-
 .ks-row.highlight .ks-value {
     color: var(--accent-green);
     font-size: 0.95rem;
 }
 
-
-/* ═══════════════════════════════
-   6. SMART INSIGHTS (existing)
-   ═══════════════════════════════ */
+/* Smart Insights */
 .insights-section {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -534,7 +496,6 @@
     gap: 0.9rem;
 }
 
-/* ── Individual Insight Card ── */
 .insight-card {
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
@@ -562,7 +523,7 @@
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
-/* Accent colors for the left bar */
+/* Accent left bar */
 .insight-card.accent-green::before  { background: var(--accent-green); }
 .insight-card.accent-red::before    { background: var(--accent-red); }
 .insight-card.accent-yellow::before { background: var(--accent-yellow); }
@@ -573,7 +534,6 @@
 .insight-card.accent-yellow:hover { border-color: rgba(255, 215, 0, 0.3); }
 .insight-card.accent-blue:hover   { border-color: rgba(0, 212, 255, 0.3); }
 
-/* Card header row: icon + title */
 .insight-header {
     display: flex;
     align-items: center;
@@ -581,8 +541,7 @@
 }
 
 .insight-icon {
-    width: 30px;
-    height: 30px;
+    width: 30px; height: 30px;
     border-radius: 8px;
     display: flex;
     align-items: center;
@@ -605,19 +564,16 @@
     line-height: 1.35;
 }
 
-/* Description text */
 .insight-desc {
     font-size: 0.85rem;
     color: var(--text-secondary);
     line-height: 1.55;
 }
-
 .insight-desc strong {
     color: var(--text-primary);
     font-weight: bold;
 }
 
-/* Signal indicator row */
 .insight-signal {
     display: flex;
     align-items: center;
@@ -627,8 +583,7 @@
 }
 
 .signal-dot {
-    width: 6px;
-    height: 6px;
+    width: 6px; height: 6px;
     border-radius: 50%;
     flex-shrink: 0;
 }
@@ -650,7 +605,7 @@
 .signal-label.sig-yellow { color: var(--accent-yellow); }
 .signal-label.sig-blue   { color: var(--accent-blue); }
 
-/* Stagger animation for insight cards */
+/* Stagger animation */
 .insight-card { animation: fadeIn 0.4s ease-out both; }
 .insight-card:nth-child(1) { animation-delay: 0.05s; }
 .insight-card:nth-child(2) { animation-delay: 0.10s; }
@@ -659,9 +614,7 @@
 .insight-card:nth-child(5) { animation-delay: 0.25s; }
 .insight-card:nth-child(6) { animation-delay: 0.30s; }
 
-/* ═══════════════════════════════
-   6b. ML PREDICTION SECTION
-   ═══════════════════════════════ */
+/* ML Prediction */
 .prediction-section {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -704,7 +657,6 @@
     font-weight: bold;
 }
 
-/* ── Prediction Grid (4-tile layout) ── */
 .prediction-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -724,10 +676,7 @@
 }
 
 .pred-tile:last-child { border-right: none; }
-
-.pred-tile:hover {
-    background: var(--bg-tertiary);
-}
+.pred-tile:hover { background: var(--bg-tertiary); }
 
 .pred-tile-label {
     font-size: 0.75rem;
@@ -757,7 +706,7 @@
     line-height: 1.4;
 }
 
-/* ── Confidence Bar ── */
+/* Confidence bar */
 .pred-confidence-bar {
     width: 80%;
     height: 6px;
@@ -781,12 +730,12 @@
 .pred-confidence-fill.conf-medium { background: var(--accent-yellow); }
 .pred-confidence-fill.conf-low    { background: var(--accent-red); }
 
-/* ── Trend tile accent border ── */
+/* Trend tile accent */
 .pred-tile.trend-bullish  { border-bottom: 2px solid var(--accent-green); }
 .pred-tile.trend-bearish  { border-bottom: 2px solid var(--accent-red); }
 .pred-tile.trend-sideways { border-bottom: 2px solid var(--accent-yellow); }
 
-/* ── Disclaimer Note ── */
+/* Disclaimer */
 .prediction-note {
     margin-top: 1rem;
     padding: 0.65rem 1rem;
@@ -800,10 +749,8 @@
     line-height: 1.55;
 }
 
-/* ── Loading Shimmer ── */
-.prediction-loader {
-    padding: 0;
-}
+/* Prediction loader shimmer */
+.prediction-loader { padding: 0; }
 
 .pred-shimmer-grid {
     display: grid;
@@ -824,7 +771,6 @@
     animation: shimmer 1.5s ease-in-out infinite;
     border-right: 1px solid var(--border-color);
 }
-
 .pred-shimmer:last-child { border-right: none; }
 
 @keyframes shimmer {
@@ -832,7 +778,7 @@
     100% { background-position: -200% 0; }
 }
 
-/* ── Error State ── */
+/* Prediction error state */
 .prediction-error {
     display: flex;
     flex-direction: column;
@@ -843,8 +789,7 @@
 }
 
 .pred-error-icon {
-    width: 40px;
-    height: 40px;
+    width: 40px; height: 40px;
     background: rgba(255, 51, 102, 0.08);
     color: var(--accent-red);
     border-radius: 50%;
@@ -861,9 +806,7 @@
     font-size: 0.85rem;
 }
 
-/* ═══════════════════════════════
-   7. QUICK DECISION PANEL
-   ═══════════════════════════════ */
+/* Quick Decision Panel */
 .decision-panel {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -907,8 +850,7 @@
 .risks-header     { color: var(--accent-red); }
 
 .decision-dot {
-    width: 8px;
-    height: 8px;
+    width: 8px; height: 8px;
     border-radius: 50%;
     flex-shrink: 0;
 }
@@ -939,7 +881,6 @@
     position: relative;
     border-bottom: 1px solid rgba(42,52,65,0.25);
 }
-
 .decision-list li:last-child { border-bottom: none; }
 
 .decision-list li::before {
@@ -948,24 +889,17 @@
     left: 0;
     top: 50%;
     transform: translateY(-50%);
-    width: 4px;
-    height: 4px;
+    width: 4px; height: 4px;
     border-radius: 50%;
 }
 
 .strengths-header + .decision-list li::before,
-#strengths-list li::before {
-    background: var(--accent-green);
-}
+#strengths-list li::before { background: var(--accent-green); }
 
 .risks-header + .decision-list li::before,
-#risks-list li::before {
-    background: var(--accent-red);
-}
+#risks-list li::before { background: var(--accent-red); }
 
-.decision-list li strong {
-    color: var(--text-primary);
-}
+.decision-list li strong { color: var(--text-primary); }
 
 .decision-conclusion {
     margin-top: 1.4rem;
@@ -989,9 +923,7 @@
     border-radius: 3px 0 0 3px;
 }
 
-.decision-conclusion strong {
-    color: var(--text-primary);
-}
+.decision-conclusion strong { color: var(--text-primary); }
 
 .conclusion-bullish { border-color: rgba(0,255,136,0.2); }
 .conclusion-bullish::before { background: var(--accent-green); }
@@ -1000,9 +932,7 @@
 .conclusion-neutral { border-color: rgba(255,215,0,0.2); }
 .conclusion-neutral::before { background: var(--accent-yellow); }
 
-/* ═══════════════════════════════
-   8. DETAILED FUNDAMENTALS
-   ═══════════════════════════════ */
+/* Detailed Fundamentals */
 .fundamentals-section {
     margin-bottom: 2rem;
     animation: fadeIn 0.6s ease-out 0.5s both;
@@ -1048,20 +978,19 @@
     transition: transform 0.3s ease;
 }
 
-.fund-tab:hover { color: var(--text-primary); }
+.fund-tab:hover  { color: var(--text-primary); }
 .fund-tab.active { color: var(--accent-green); }
 .fund-tab.active::after { transform: scaleX(1); }
 
-/* Panels */
 .fund-panel { display: none; }
 .fund-panel.active { display: block; animation: fadeIn 0.3s ease-out; }
 
-/* Cards container – horizontal scroll */
+/* Cards — horizontal scroll */
 .fund-cards {
     display: flex;
     gap: 1.4rem;
     overflow-x: auto;
-    padding: 0.8rem 0 0.8rem 0;
+    padding: 0.8rem 0;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
 }
@@ -1071,7 +1000,6 @@
 .fund-cards::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 3px; }
 .fund-cards::-webkit-scrollbar-thumb:hover { background: var(--accent-green); }
 
-/* Individual cards */
 .fund-card {
     min-width: 280px;
     max-width: 320px;
@@ -1101,11 +1029,8 @@
     border-bottom: 1px solid var(--border-color);
 }
 
-.fund-card-body {
-    padding: 1.1rem 1.4rem;
-}
+.fund-card-body { padding: 1.1rem 1.4rem; }
 
-/* Metric rows inside cards */
 .fund-metric {
     display: flex;
     justify-content: space-between;
@@ -1114,7 +1039,6 @@
     border-bottom: 1px solid rgba(42,52,65,0.35);
     font-size: 0.9rem;
 }
-
 .fund-metric:last-child { border-bottom: none; }
 
 .fund-metric-label { color: var(--text-secondary); }
@@ -1124,7 +1048,6 @@
     color: var(--accent-blue);
     font-weight: 600;
 }
-
 .fund-metric.highlight .fund-metric-value {
     color: var(--accent-green);
     font-size: 0.95rem;
@@ -1143,9 +1066,7 @@
 }
 .fund-empty-icon { font-size: 3rem; opacity: 0.3; }
 
-/* ═══════════════════════════════
-   UTILITY: Loading, Logo, Badge, Toast
-   ═══════════════════════════════ */
+/* Utilities */
 .loading-overlay {
     display: none;
     position: fixed;
@@ -1231,9 +1152,7 @@
 }
 .toast.show { opacity: 1; transform: translateY(0); }
 
-/* ═══════════════════════════════
-   RESPONSIVE
-   ═══════════════════════════════ */
+/* Responsive */
 @media (max-width: 768px) {
     .hero-top { flex-direction: column; }
     .price-block { text-align: left; }

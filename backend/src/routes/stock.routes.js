@@ -5,18 +5,14 @@ const { getTickerData, getMarketOverview, getTrendingStocks } = require("../cont
 
 const router = express.Router();
 
-// GET /api/stocks/search?query=...  — search from local JSON
 router.get("/search", searchStocks);
 
-// Dashboard data endpoints (must be before /:symbol)
+// Dashboard endpoints (must be before /:symbol catch-all)
 router.get("/ticker",   getTickerData);
 router.get("/overview", getMarketOverview);
 router.get("/trending", getTrendingStocks);
 
-// GET /api/stocks/:symbol/candles — fetch historical chart data
 router.get("/:symbol/candles", getChartData);
-
-// GET /api/stocks/:symbol  — fetch stock details via Finnhub
 router.get("/:symbol", getStockDetails);
 
 module.exports = router;

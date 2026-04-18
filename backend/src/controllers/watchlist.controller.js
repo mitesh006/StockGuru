@@ -1,23 +1,8 @@
-/**
- * watchlist.controller.js — Watchlist CRUD for authenticated users
- *
- * Endpoints:
- *   GET    /api/watchlist              — list user's watchlist with live prices
- *   POST   /api/watchlist              — add a stock symbol
- *   DELETE /api/watchlist/:symbol      — remove a stock symbol
- *   GET    /api/watchlist/check/:symbol — check if symbol is in watchlist
- */
-
 const Watchlist = require("../models/Watchlist");
 const stocks = require("../data/stocks.json");
 const { getQuote } = require("../services/finnhub.service");
 const { normalize, isValid } = require("../utils/symbolNormalizer");
 
-/**
- * GET /api/watchlist
- * Fetch all watchlist entries for the logged-in user,
- * enriched with live price data from Finnhub (cached/deduped).
- */
 const getWatchlist = async (req, res) => {
     try {
         const entries = await Watchlist.find({ user: req.user._id })
@@ -28,12 +13,10 @@ const getWatchlist = async (req, res) => {
             return res.json({ success: true, data: [] });
         }
 
-        // Enrich each symbol with live quote data (all cached/deduplicated)
         const enriched = await Promise.allSettled(
             entries.map(async (entry) => {
                 try {
                     const q = await getQuote(entry.symbol);
-                    // Look up company name from local stocks.json
                     const stockInfo = stocks.find(
                         (s) => s.symbol.toUpperCase() === entry.symbol
                     );
@@ -51,7 +34,7 @@ const getWatchlist = async (req, res) => {
                         addedAt: entry.createdAt,
                     };
                 } catch {
-                    // If quote fails, still return the symbol with no price data
+                    // Return symbol with null prices if quote fetch fails
                     const stockInfo = stocks.find(
                         (s) => s.symbol.toUpperCase() === entry.symbol
                     );
@@ -72,8 +55,7 @@ const getWatchlist = async (req, res) => {
             .map((r) => r.value);
 
         res.json({ success: true, data });
-    } catch (error) {
-        console.error("Watchlist fetch error:", error.message);
+    } catch {
         res.status(500).json({
             success: false,
             message: "Failed to load watchlist.",
@@ -81,11 +63,6 @@ const getWatchlist = async (req, res) => {
     }
 };
 
-/**
- * POST /api/watchlist
- * Body: { symbol: "AAPL" }
- * Add a stock to the user's watchlist.
- */
 const addToWatchlist = async (req, res) => {
     try {
         const sym = normalize(req.body.symbol);
@@ -97,7 +74,6 @@ const addToWatchlist = async (req, res) => {
             });
         }
 
-        // Verify symbol exists in our local stock list
         const stockInfo = stocks.find(
             (s) => s.symbol.toUpperCase() === sym
         );
@@ -108,7 +84,6 @@ const addToWatchlist = async (req, res) => {
             });
         }
 
-        // Try to create — the unique index will prevent duplicates
         await Watchlist.create({ user: req.user._id, symbol: sym });
 
         res.status(201).json({
@@ -117,14 +92,13 @@ const addToWatchlist = async (req, res) => {
             symbol: sym,
         });
     } catch (error) {
-        // Duplicate key error (MongoDB code 11000)
+        // MongoDB duplicate key error
         if (error.code === 11000) {
             return res.status(409).json({
                 success: false,
                 message: `${normalize(req.body.symbol)} is already in your watchlist.`,
             });
         }
-        console.error("Watchlist add error:", error.message);
         res.status(500).json({
             success: false,
             message: "Failed to add stock to watchlist.",
@@ -132,10 +106,6 @@ const addToWatchlist = async (req, res) => {
     }
 };
 
-/**
- * DELETE /api/watchlist/:symbol
- * Remove a stock from the user's watchlist.
- */
 const removeFromWatchlist = async (req, res) => {
     try {
         const sym = normalize(req.params.symbol);
@@ -157,8 +127,7 @@ const removeFromWatchlist = async (req, res) => {
             message: `${sym} removed from watchlist.`,
             symbol: sym,
         });
-    } catch (error) {
-        console.error("Watchlist remove error:", error.message);
+    } catch {
         res.status(500).json({
             success: false,
             message: "Failed to remove stock from watchlist.",
@@ -166,11 +135,6 @@ const removeFromWatchlist = async (req, res) => {
     }
 };
 
-/**
- * GET /api/watchlist/check/:symbol
- * Check if a specific symbol is in the user's watchlist.
- * Returns { success: true, inWatchlist: true/false }
- */
 const checkWatchlist = async (req, res) => {
     try {
         const sym = normalize(req.params.symbol);
@@ -185,8 +149,7 @@ const checkWatchlist = async (req, res) => {
             inWatchlist: !!exists,
             symbol: sym,
         });
-    } catch (error) {
-        console.error("Watchlist check error:", error.message);
+    } catch {
         res.status(500).json({
             success: false,
             message: "Failed to check watchlist status.",

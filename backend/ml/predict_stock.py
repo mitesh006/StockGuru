@@ -1,23 +1,12 @@
 """
-predict_stock.py — Dual-Mode Stock Price Prediction
-=====================================================
-Supports two investment horizons:
-  • short  → next-day estimate using recent price action
-  • long   → 30-day outlook using broader trend analysis
+predict_stock.py — Dual-mode stock price prediction
 
-Techniques used (keep it simple & explainable):
-  1. Moving Averages (MA crossover for trend direction)
-  2. Linear Regression (sklearn) for price projection
-  3. Volatility (standard deviation) for confidence & range
+Modes:
+  short — next-day estimate using recent price action
+  long  — 30-day outlook using broader trend analysis
 
-Input  (JSON via stdin):
-  { "prices": [float, ...], "mode": "short" | "long" }
-
-Output (JSON via stdout):
-  { "success": true, "mode": "...", "trend": "...",
-    "predictedPrice": float, "predictedRange": { "low": ..., "high": ... },
-    "confidence": int, "explanation": "...",
-    "indicators": { "maShort": ..., "maLong": ..., "slope": ..., "volatility": ... } }
+Input  (JSON via stdin): { "prices": [float, ...], "mode": "short" | "long" }
+Output (JSON via stdout): { "success": true, "trend": "...", "predictedPrice": float, ... }
 """
 
 import sys
@@ -26,30 +15,19 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 
 
-# ═══════════════════════════════════════════
-# HELPER FUNCTIONS
-# ═══════════════════════════════════════════
-
 def moving_average(data, window):
-    """Calculate simple moving average over the last `window` points."""
     if len(data) < window:
         return sum(data) / len(data)
     return sum(data[-window:]) / window
 
 
 def compute_volatility(prices, window=None):
-    """Standard deviation of the most recent `window` prices."""
     if window and len(prices) >= window:
         return float(np.std(prices[-window:]))
     return float(np.std(prices))
 
 
 def linear_regression_predict(prices, forward_steps=1):
-    """
-    Fit a linear regression on the price series and predict
-    `forward_steps` into the future.
-    Returns: (predicted_price, slope, r_squared)
-    """
     x = np.arange(len(prices)).reshape(-1, 1)
     y = np.array(prices).reshape(-1, 1)
 
@@ -59,24 +37,18 @@ def linear_regression_predict(prices, forward_steps=1):
     future_x = np.array([[len(prices) - 1 + forward_steps]])
     predicted = float(model.predict(future_x)[0][0])
     slope = float(model.coef_[0][0])
-
-    # R² score — measures how well the linear fit explains the data
     r_squared = float(model.score(x, y))
 
     return predicted, slope, r_squared
 
 
-# ═══════════════════════════════════════════
-# MODE CONFIGURATIONS
-# ═══════════════════════════════════════════
-
 MODE_CONFIG = {
     "short": {
-        "ma_short_window": 5,       # Fast moving average
-        "ma_long_window": 10,       # Slow moving average
-        "regression_window": 30,    # Use last 30 days for regression
-        "forward_steps": 1,         # Predict 1 day ahead
-        "volatility_window": 10,    # Recent volatility
+        "ma_short_window": 5,
+        "ma_long_window": 10,
+        "regression_window": 30,
+        "forward_steps": 1,
+        "volatility_window": 10,
         "label": "Short-Term",
         "explanation_template": (
             "Based on {ma_short}/{ma_long}-day moving averages, "
@@ -84,11 +56,11 @@ MODE_CONFIG = {
         ),
     },
     "long": {
-        "ma_short_window": 20,      # Fast moving average
-        "ma_long_window": 50,       # Slow moving average
-        "regression_window": None,  # Use all available data
-        "forward_steps": 30,        # Predict 30 days ahead
-        "volatility_window": 30,    # Broader volatility
+        "ma_short_window": 20,
+        "ma_long_window": 50,
+        "regression_window": None,  # use all available data
+        "forward_steps": 30,
+        "volatility_window": 30,
         "label": "Long-Term",
         "explanation_template": (
             "Based on {ma_short}/{ma_long}-day moving averages, "
@@ -98,16 +70,7 @@ MODE_CONFIG = {
 }
 
 
-# ═══════════════════════════════════════════
-# MAIN PREDICTION FUNCTION
-# ═══════════════════════════════════════════
-
 def predict(prices, mode="short"):
-    """
-    Run prediction in the given mode.
-    Returns a dict with trend, predicted price, range, confidence, etc.
-    """
-    # ── Validate input ──
     if len(prices) < 5:
         return {
             "success": False,
@@ -117,24 +80,18 @@ def predict(prices, mode="short"):
     config = MODE_CONFIG.get(mode, MODE_CONFIG["short"])
     prices = np.array(prices, dtype=float)
 
-    # ── 1. Moving Averages ──
     ma_short = moving_average(prices.tolist(), config["ma_short_window"])
     ma_long = moving_average(prices.tolist(), config["ma_long_window"])
 
-    # ── 2. Select regression window ──
     reg_window = config["regression_window"]
-    if reg_window and len(prices) > reg_window:
-        reg_prices = prices[-reg_window:]
-    else:
-        reg_prices = prices
+    reg_prices = prices[-reg_window:] if reg_window and len(prices) > reg_window else prices
 
-    # ── 3. Linear Regression ──
     forward_steps = config["forward_steps"]
     predicted_price, slope, r_squared = linear_regression_predict(
         reg_prices.tolist(), forward_steps
     )
 
-    # ── 4. Trend determination (MA crossover + slope) ──
+    # Trend: MA crossover + slope direction
     if ma_short > ma_long and slope > 0:
         trend = "Bullish"
     elif ma_short < ma_long and slope < 0:
@@ -142,38 +99,33 @@ def predict(prices, mode="short"):
     else:
         trend = "Sideways"
 
-    # ── 5. Volatility & predicted range ──
     vol_window = config["volatility_window"]
     volatility = compute_volatility(prices.tolist(), vol_window)
 
-    # Scale range by forward_steps (longer horizon = wider range)
-    range_factor = np.sqrt(forward_steps)  # volatility scales with sqrt of time
+    # Wider range for longer horizons (volatility scales with sqrt of time)
+    range_factor = np.sqrt(forward_steps)
     range_spread = volatility * range_factor
 
     lower_range = round(predicted_price - range_spread, 2)
     upper_range = round(predicted_price + range_spread, 2)
 
-    # ── 6. Confidence score (35–85 range) ──
+    # Confidence score (clamped 35–85)
     confidence = 50
 
-    # Trend agreement bonus
     recent_return = ((prices[-1] - prices[0]) / prices[0]) * 100
     if trend == "Bullish" and recent_return > 0:
         confidence += 10
     elif trend == "Bearish" and recent_return < 0:
         confidence += 10
 
-    # Strong slope bonus
     if abs(slope) > 0.3:
         confidence += 8
 
-    # R² bonus — higher means the trend line fits well
     if r_squared > 0.7:
         confidence += 10
     elif r_squared > 0.4:
         confidence += 5
 
-    # Low volatility bonus
     if volatility < 3:
         confidence += 7
     elif volatility < 6:
@@ -181,16 +133,13 @@ def predict(prices, mode="short"):
     elif volatility > 12:
         confidence -= 5
 
-    # Clamp to safe range
     confidence = max(35, min(confidence, 85))
 
-    # ── 7. Build explanation ──
     explanation = config["explanation_template"].format(
         ma_short=config["ma_short_window"],
         ma_long=config["ma_long_window"]
     )
 
-    # ── 8. Return result ──
     return {
         "success": True,
         "mode": mode,
@@ -213,16 +162,12 @@ def predict(prices, mode="short"):
     }
 
 
-# ═══════════════════════════════════════════
-# ENTRY POINT — reads JSON from stdin
-# ═══════════════════════════════════════════
-
 if __name__ == "__main__":
     try:
         raw = sys.stdin.read()
         data = json.loads(raw)
         prices = data.get("prices", [])
-        mode = data.get("mode", "short")  # default to short-term
+        mode = data.get("mode", "short")
 
         result = predict(prices, mode)
         print(json.dumps(result))

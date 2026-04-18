@@ -1,11 +1,9 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
-// ─── Generate JWT ───
 const signToken = (id) =>
     jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
-// ─── POST /api/auth/register ───
 const register = async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -32,13 +30,11 @@ const register = async (req, res) => {
             token,
             user,
         });
-    } catch (error) {
-        console.error("Register error:", error.message);
+    } catch {
         res.status(500).json({ success: false, message: "Registration failed. Please try again." });
     }
 };
 
-// ─── POST /api/auth/login ───
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -65,13 +61,11 @@ const login = async (req, res) => {
             token,
             user,
         });
-    } catch (error) {
-        console.error("Login error:", error.message);
+    } catch {
         res.status(500).json({ success: false, message: "Login failed. Please try again." });
     }
 };
 
-// ─── GET /api/auth/me  (protected) ───
 const getMe = async (req, res) => {
     res.json({ success: true, user: req.user });
 };

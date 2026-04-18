@@ -1,31 +1,13 @@
-/**
- * finnhub.service.js — Finnhub API wrapper with caching + deduplication
- *
- * WHAT CHANGED (Refactor):
- * - Added cache layer: quote (30s), profile (24h), metrics (1h)
- * - Added request deduplication: concurrent calls for same symbol share one Promise
- * - Added error classification: rate-limit vs invalid-symbol vs network error
- * - Added stale-cache fallback: if API fails, returns last known data
- * - Added DEV_MODE support: returns mock data when DEV_MODE=true in .env
- * - Added [Finnhub] prefixed logging for every external call
- *
- * WHY: Finnhub free tier = 60 calls/min. Dashboard alone used 15 calls per load.
- * With caching, repeat loads within 30s cost 0 calls.
- */
-
 const axios = require("axios");
 const cache = require("../utils/cacheManager");
 const { dedupe } = require("../utils/requestDeduplicator");
-const { classify } = require("../utils/apiErrorHandler");
 const { normalize } = require("../utils/symbolNormalizer");
 
 const API_KEY = process.env.FINNHUB_API_KEY;
 const BASE_URL = "https://finnhub.io/api/v1";
 const DEV_MODE = process.env.DEV_MODE === "true";
 
-// ═══════════════════════════════════════════
-// MOCK DATA (used when DEV_MODE=true)
-// ═══════════════════════════════════════════
+// Mock data for local development without API calls
 const MOCK_QUOTE = {
     price: 150.25, open: 149.50, high: 152.00,
     low: 148.75, previousClose: 149.00,
@@ -45,27 +27,16 @@ const MOCK_METRICS = {
     quarterlyFundamentals: [],
 };
 
-// ═══════════════════════════════════════════
-// GET QUOTE — cached 30s, deduplicated
-// ═══════════════════════════════════════════
 const getQuote = async (symbol) => {
     const sym = normalize(symbol);
 
-    // DEV_MODE: skip external API entirely
-    if (DEV_MODE) {
-        console.log(`[Finnhub] DEV_MODE — returning mock quote for ${sym}`);
-        return { ...MOCK_QUOTE };
-    }
+    if (DEV_MODE) return { ...MOCK_QUOTE };
 
-    // Check cache first (saves an API call if data is fresh)
     const cached = cache.get("quote", sym);
     if (cached) return cached.data;
 
-    // Deduplicate: if another request for this symbol is already flying,
-    // piggyback on it instead of making a second API call
     return dedupe(`quote:${sym}`, async () => {
         try {
-            console.log(`[Finnhub] Fetching quote for ${sym}...`);
             const { data } = await axios.get(`${BASE_URL}/quote`, {
                 params: { symbol: sym, token: API_KEY },
             });
@@ -85,31 +56,23 @@ const getQuote = async (symbol) => {
             cache.set("quote", sym, result);
             return result;
         } catch (error) {
-            // Fallback: return stale cached data if available
             const stale = cache.getStale("quote", sym);
             if (stale) return stale;
-            throw error; // No stale data — propagate the error
+            throw error;
         }
     });
 };
 
-// ═══════════════════════════════════════════
-// GET PROFILE — cached 24h, deduplicated
-// ═══════════════════════════════════════════
 const getProfile = async (symbol) => {
     const sym = normalize(symbol);
 
-    if (DEV_MODE) {
-        console.log(`[Finnhub] DEV_MODE — returning mock profile for ${sym}`);
-        return { ...MOCK_PROFILE, name: sym };
-    }
+    if (DEV_MODE) return { ...MOCK_PROFILE, name: sym };
 
     const cached = cache.get("profile", sym);
     if (cached) return cached.data;
 
     return dedupe(`profile:${sym}`, async () => {
         try {
-            console.log(`[Finnhub] Fetching profile for ${sym}...`);
             const { data } = await axios.get(`${BASE_URL}/stock/profile2`, {
                 params: { symbol: sym, token: API_KEY },
             });
@@ -133,23 +96,16 @@ const getProfile = async (symbol) => {
     });
 };
 
-// ═══════════════════════════════════════════
-// GET METRICS — cached 1h, deduplicated
-// ═══════════════════════════════════════════
 const getMetrics = async (symbol) => {
     const sym = normalize(symbol);
 
-    if (DEV_MODE) {
-        console.log(`[Finnhub] DEV_MODE — returning mock metrics for ${sym}`);
-        return { ...MOCK_METRICS };
-    }
+    if (DEV_MODE) return { ...MOCK_METRICS };
 
     const cached = cache.get("metrics", sym);
     if (cached) return cached.data;
 
     return dedupe(`metrics:${sym}`, async () => {
         try {
-            console.log(`[Finnhub] Fetching metrics for ${sym}...`);
             const { data } = await axios.get(`${BASE_URL}/stock/metric`, {
                 params: { symbol: sym, metric: "all", token: API_KEY },
             });
@@ -159,7 +115,6 @@ const getMetrics = async (symbol) => {
             const annual = series.annual || {};
             const quarterly = series.quarterly || {};
 
-            // ── Current snapshot metrics ──
             const currentMetrics = {
                 peRatio: m.peNormalizedAnnual ?? m.peBasicExclExtraTTM ?? null,
                 eps: m.epsNormalizedAnnual ?? m.epsBasicExclExtraItemsTTM ?? null,
@@ -176,7 +131,7 @@ const getMetrics = async (symbol) => {
                 revenuePerShare: m.revenuePerShareTTM ?? null,
             };
 
-            // ── Helper: build a year→{field: value} map from Finnhub series arrays ──
+            // Build a period→{field: value} map from Finnhub time series
             function buildMap(seriesObj, fieldMap) {
                 const map = {};
                 for (const [finnhubKey, readableName] of Object.entries(fieldMap)) {
@@ -192,7 +147,6 @@ const getMetrics = async (symbol) => {
                 return map;
             }
 
-            // ── Annual fundamentals (latest 3 years) ──
             const annualFieldMap = {
                 eps: "eps", pe: "pe", roe: "roe", roa: "roa",
                 bookValue: "bookValue", revenuePerShare: "revenuePerShare",
@@ -214,7 +168,6 @@ const getMetrics = async (symbol) => {
                     operatingMargin: item.operatingMargin ?? null,
                 }));
 
-            // ── Quarterly fundamentals (latest 4 quarters) ──
             const quarterlyFieldMap = {
                 eps: "eps", pe: "pe", roe: "roe", roa: "roa", bookValue: "bookValue",
             };

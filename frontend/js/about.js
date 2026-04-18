@@ -19,4 +19,3 @@ sections.forEach(section => {
     observer.observe(section);
 });
 
-console.log('StockGuru About page loaded!');

@@ -1,8 +1,6 @@
-/* ===== Dashboard-specific styles (dashboard.html only) ===== */
+/* Dashboard page styles */
 
-/* ═══════════════════════════════
-   TICKER BAR
-   ═══════════════════════════════ */
+/* Ticker Bar */
 .ticker-bar {
     width: 100%;
     background: var(--bg-card);
@@ -82,9 +80,7 @@
     animation: pulse 1.5s ease-in-out infinite;
 }
 
-/* ═══════════════════════════════
-   HERO / SEARCH
-   ═══════════════════════════════ */
+/* Hero / Search */
 .dash-hero {
     text-align: center;
     padding: 3rem 0 2rem;
@@ -107,7 +103,7 @@
     letter-spacing: 1px;
 }
 
-.search-section { 
+.search-section {
     display: flex;
     justify-content: center;
     position: relative;
@@ -196,9 +192,7 @@
     font-size: 0.88rem;
 }
 
-/* ═══════════════════════════════
-   SECTION TITLES
-   ═══════════════════════════════ */
+/* Section Titles */
 .dash-section { margin-bottom: 2rem; }
 
 .dash-section-title {
@@ -210,9 +204,7 @@
     margin-bottom: 1rem;
 }
 
-/* ═══════════════════════════════
-   MARKET OVERVIEW (3 index cards)
-   ═══════════════════════════════ */
+/* Market Overview */
 .overview-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -280,9 +272,7 @@
     50%       { opacity: 1; }
 }
 
-/* ═══════════════════════════════
-   TRENDING STOCKS (6 cards)
-   ═══════════════════════════════ */
+/* Trending Stocks */
 .trending-grid {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
@@ -333,16 +323,13 @@
 .trending-change.pos { color: var(--accent-green); }
 .trending-change.neg { color: var(--accent-red); }
 
-/* Active card highlight */
 .trending-card.active {
     border-color: var(--accent-green);
     box-shadow: 0 0 16px rgba(0,255,136,0.15), inset 3px 0 0 var(--accent-green);
     transform: translateY(-4px);
 }
 
-/* ═══════════════════════════════
-   CHART AREA (canvas + overlays)
-   ═══════════════════════════════ */
+/* Chart Area */
 .chart-area {
     position: relative;
     width: 100%;
@@ -401,9 +388,7 @@
     text-align: center;
 }
 
-/* ═══════════════════════════════
-   CHART SECTION
-   ═══════════════════════════════ */
+/* Chart Section */
 .chart-section {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -486,16 +471,13 @@
     z-index: 1;
 }
 
-/* Error state */
 .section-error {
     color: var(--text-dim);
     font-size: 0.9rem;
     padding: 1rem 0;
 }
 
-/* ═══════════════════════════════
-   ANIMATIONS
-   ═══════════════════════════════ */
+/* Animations */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -509,9 +491,7 @@
     to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ═══════════════════════════════
-   RESPONSIVE
-   ═══════════════════════════════ */
+/* Responsive */
 @media (max-width: 1024px) {
     .trending-grid { grid-template-columns: repeat(3, 1fr); }
 }

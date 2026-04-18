@@ -1,44 +1,14 @@
-/**
- * prediction.controller.js — ML Prediction Controller
- *
- * Connects the Node.js backend with the Python prediction script.
- * Supports dual investment-horizon modes: "short" and "long".
- *
- * Flow:
- *   1. Read ?mode=short|long from query params
- *   2. Fetch historical chart data (3M for short, 1Y for long)
- *   3. Extract closing prices from candle objects
- *   4. Pipe { prices, mode } into `backend/ml/predict_stock.py` via child_process.spawn
- *   5. Parse Python's JSON stdout and return it as the API response
- */
-
 const path = require("path");
 const { spawn } = require("child_process");
 const { getChartData } = require("../services/alphaVantage.service");
 
-// Absolute path to the Python prediction script
 const PYTHON_SCRIPT = path.resolve(__dirname, "../../ml/predict_stock.py");
 
-// Period to fetch based on horizon mode
 const MODE_PERIODS = {
-    short: "3M",   // ~90 days of daily prices for short-term analysis
-    long:  "1Y",   // ~365 days for long-term trend analysis
+    short: "3M",
+    long:  "1Y",
 };
 
-// ═══════════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════════
-
-/**
- * Extract the closing price from a single candle object.
- * Supports multiple field conventions:
- *   { price }  — used by AlphaVantage service
- *   { close }  — common candle format
- *   { c }      — compact / Finnhub-style
- *
- * @param {Object} candle
- * @returns {number|null}
- */
 function extractClose(candle) {
     const raw = candle.price ?? candle.close ?? candle.c ?? null;
     if (raw === null || raw === undefined) return null;
@@ -46,14 +16,6 @@ function extractClose(candle) {
     return Number.isFinite(num) ? num : null;
 }
 
-/**
- * Spawn the Python prediction script, write JSON to stdin, and collect stdout/stderr.
- * Returns a Promise that resolves with the parsed JSON output.
- *
- * @param {number[]} prices - Array of closing prices
- * @param {string} mode - "short" or "long"
- * @returns {Promise<Object>}
- */
 function runPythonPredict(prices, mode) {
     return new Promise((resolve, reject) => {
         const py = spawn("python", [PYTHON_SCRIPT], {
@@ -80,10 +42,8 @@ function runPythonPredict(prices, mode) {
                 );
             }
 
-            // Parse JSON output from Python
             try {
-                const result = JSON.parse(stdout);
-                resolve(result);
+                resolve(JSON.parse(stdout));
             } catch {
                 reject(
                     new Error(
@@ -94,51 +54,19 @@ function runPythonPredict(prices, mode) {
             }
         });
 
-        // Write the prices + mode payload to stdin and close the stream
         py.stdin.write(JSON.stringify({ prices, mode }));
         py.stdin.end();
     });
 }
 
-// ═══════════════════════════════════════════
-// CONTROLLER
-// ═══════════════════════════════════════════
-
-/**
- * GET /api/stocks/:symbol/prediction
- *
- * Query params (optional):
- *   ?mode=short  — short-term prediction (default)
- *   ?mode=long   — long-term prediction
- *   ?period=6M   — override chart period (rarely needed)
- *
- * Response (200):
- * {
- *   success: true,
- *   symbol: "AAPL",
- *   mode: "short",
- *   trend: "Bullish",
- *   predictedPrice: 189.42,
- *   predictedRange: { low: 185.10, high: 193.74 },
- *   confidence: 72,
- *   explanation: "Based on 5/10-day moving averages...",
- *   indicators: { maShort, maLong, recentReturn, slope, volatility, rSquared },
- *   dataPoints: 90
- * }
- */
 async function getPrediction(req, res) {
     const { symbol } = req.params;
 
-    // ── Validate mode ──
     const rawMode = (req.query.mode || "short").toLowerCase();
     const mode = rawMode === "long" ? "long" : "short";
-
-    // Use explicit period if provided, otherwise derive from mode
     const period = req.query.period || MODE_PERIODS[mode];
 
     try {
-        // ── 1. Fetch historical chart data ──
-        console.log(`[Prediction] Fetching chart data for ${symbol} (${period}, mode=${mode})...`);
         const chartResult = await getChartData(symbol, period);
 
         if (!chartResult.success || !chartResult.points || chartResult.points.length === 0) {
@@ -148,7 +76,6 @@ async function getPrediction(req, res) {
             });
         }
 
-        // ── 2. Extract closing prices ──
         const prices = chartResult.points
             .map(extractClose)
             .filter((p) => p !== null);
@@ -160,8 +87,6 @@ async function getPrediction(req, res) {
             });
         }
 
-        // ── 3. Run Python prediction with mode ──
-        console.log(`[Prediction] Running ${mode}-term prediction on ${prices.length} data points...`);
         const prediction = await runPythonPredict(prices, mode);
 
         if (!prediction.success) {
@@ -171,7 +96,6 @@ async function getPrediction(req, res) {
             });
         }
 
-        // ── 4. Return combined response ──
         return res.json({
             success: true,
             symbol: symbol.toUpperCase(),
@@ -185,7 +109,6 @@ async function getPrediction(req, res) {
             dataPoints: prices.length,
         });
     } catch (error) {
-        console.error(`[Prediction] Error for ${symbol}:`, error.message);
         return res.status(500).json({
             success: false,
             message: "Prediction failed. Please try again later.",

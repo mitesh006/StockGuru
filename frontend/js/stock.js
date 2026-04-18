@@ -1,7 +1,4 @@
-// stock.js — Stock Detail page logic
-// POLISHED: AbortController-based chart requests, proper loading/error/empty
-// states, same-period guard, watchlist add/remove with JWT auth.
-// UPGRADED: Chart Intelligence, Overall Signal, Quick Decision panels.
+// stock.js — Stock detail page
 
 const API_BASE = "http://localhost:3000/api";
 const params = new URLSearchParams(window.location.search);
@@ -9,9 +6,7 @@ const symbol = (params.get("symbol") || "AAPL").toUpperCase().trim();
 document.getElementById("stock-symbol").textContent = symbol;
 document.title = `${symbol} - StockGuru`;
 
-// ═══════════════════════════════════════════
-// CLIENT-SIDE CACHES
-// ═══════════════════════════════════════════
+
 let stockDetailsCache = null;          // Cache for current stock's detail data
 let chartDataCache = new Map();     // key: period → { points, stale, ts }
 const CHART_CLIENT_TTL = 5 * 60 * 1000; // 5 min
@@ -20,7 +15,7 @@ let chartAbort = null;            // AbortController for chart requests
 let activePeriod = null;            // Currently loaded chart period
 let currentHorizon = 'short';         // Investment horizon: 'short' | 'long'
 
-// ─── Auth helper ───
+
 function getAuthToken() {
     return localStorage.getItem("token");
 }
@@ -30,25 +25,23 @@ function getAuthHeaders() {
     return token ? { "Authorization": `Bearer ${token}` } : {};
 }
 
-// ═══════════════════════════════════════════
-// INVESTMENT HORIZON MANAGER
-// ═══════════════════════════════════════════
 
-// Chart period defaults per mode
+
+
 const HORIZON_CHART_PERIOD = { short: '1M', long: '1Y' };
 
-// Insight category priorities per mode (lower index = higher priority)
+// Sort order for insights by horizon mode
 const HORIZON_INSIGHT_PRIORITY = {
     short: ['momentum', 'range', 'volatility', 'valuation', 'profitability', 'leverage'],
     long: ['valuation', 'profitability', 'leverage', 'margin', 'range', 'momentum', 'volatility']
 };
 
-/** Read the saved horizon from localStorage. */
+
 function getCurrentHorizon() {
     return localStorage.getItem('stockguru_horizon') || 'short';
 }
 
-/** Persist and apply a new horizon mode. */
+
 function setHorizon(mode) {
     if (mode !== 'short' && mode !== 'long') mode = 'short';
     currentHorizon = mode;
@@ -57,7 +50,7 @@ function setHorizon(mode) {
     onHorizonChange(mode);
 }
 
-/** Update the toggle button states and slider position. */
+
 function updateHorizonUI(mode) {
     const btnShort = document.getElementById('horizon-btn-short');
     const btnLong = document.getElementById('horizon-btn-long');
@@ -69,7 +62,7 @@ function updateHorizonUI(mode) {
     slider.classList.toggle('slide-long', mode === 'long');
 }
 
-/** Initialize the horizon toggle — restore state and bind click events. */
+
 function initHorizonToggle() {
     currentHorizon = getCurrentHorizon();
     updateHorizonUI(currentHorizon);
@@ -83,33 +76,26 @@ function initHorizonToggle() {
     });
 }
 
-/**
- * Called whenever the horizon mode changes.
- * Orchestrates all downstream updates:
- *   1. Switch chart to the mode's default period
- *   2. Reload prediction with the new mode
- *   3. Re-sort insights by mode relevance
- *   4. Update signal headline
- */
+
 function onHorizonChange(mode) {
-    // 1. Switch chart period
+
     const targetPeriod = HORIZON_CHART_PERIOD[mode];
-    // Update the active button visually
+
     document.querySelectorAll('.chart-controls button').forEach(b => {
         b.classList.toggle('active', b.dataset.period === targetPeriod);
     });
     activePeriod = null; // force reload
     fetchAndRenderChart(targetPeriod);
 
-    // 2. Reload prediction with mode
+
     loadPrediction(symbol);
 
-    // 3. Re-sort insights if data is cached
+
     if (stockDetailsCache) {
         generateInsights(stockDetailsCache);
     }
 
-    // 4. Update signal headline
+
     const headlineEl = document.getElementById('signal-headline');
     if (headlineEl) {
         headlineEl.textContent = mode === 'long' ? 'Long-Term Signal' : 'Short-Term Signal';
@@ -118,7 +104,7 @@ function onHorizonChange(mode) {
     showToast(`Switched to ${mode === 'long' ? 'Long-Term' : 'Short-Term'} mode`);
 }
 
-// ─── Fetch stock details on page load ───
+
 async function loadStockDetails() {
     if (fetchingDetails) return;
     fetchingDetails = true;
@@ -137,8 +123,8 @@ async function loadStockDetails() {
         }
         stockDetailsCache = result.data;
         displayStockData(result.data);
-    } catch (error) {
-        console.error("Failed to fetch stock details:", error);
+    } catch {
+
         showError("Could not connect to server. Make sure backend is running.");
     } finally {
         setLoadingState(false);
@@ -146,7 +132,7 @@ async function loadStockDetails() {
     }
 }
 
-// ─── Formatting ───
+
 function fmt(v, d = 2) { return v == null ? "N/A" : `$${Number(v).toFixed(d)}`; }
 function fmtNum(v, d = 2) { return v == null ? "N/A" : Number(v).toFixed(d); }
 function fmtPct(v) { return v == null ? "N/A" : `${Number(v).toFixed(2)}%`; }
@@ -176,9 +162,9 @@ function setText(id, value) {
     if (el) el.textContent = value;
 }
 
-// ─── Render all sections ───
+
 function displayStockData(data) {
-    // ── Hero: logo, name, sector ──
+
     const logoEl = document.getElementById("company-logo");
     if (data.company?.logo) {
         logoEl.src = data.company.logo;
@@ -189,7 +175,7 @@ function displayStockData(data) {
     setText("company-name", data.company?.name || symbol);
     setText("tag-sector", data.company?.industry || "N/A");
 
-    // ── Hero: price + change ──
+
     const priceEl = document.getElementById("current-price");
     if (priceEl) priceEl.textContent = fmt(data.price);
     const changeEl = document.getElementById("price-change");
@@ -202,7 +188,7 @@ function displayStockData(data) {
         if (!up) priceEl.classList.add("down");
     }
 
-    // Trend badge
+
     const trendEl = document.getElementById("trend-badge");
     if (trendEl && data.price != null && data.previousClose != null) {
         const up = data.price >= data.previousClose;
@@ -211,17 +197,17 @@ function displayStockData(data) {
         trendEl.style.display = "inline-block";
     }
 
-    // Update chart title
+
     setText("chart-title", `📈 ${data.company?.name || symbol}`);
 
-    // ── Compact stats row ──
+
     setText("stat-open", fmt(data.open));
     setText("stat-high", fmt(data.high));
     setText("stat-low", fmt(data.low));
     setText("stat-close", fmt(data.previousClose));
     setText("stat-volume", fmtVol(data.volume));
 
-    // ── Key Statistics ──
+
     const cm = data.currentMetrics || {};
     setText("ks-pe", fmtNum(cm.peRatio));
     setText("ks-eps", fmt(cm.eps));
@@ -237,15 +223,15 @@ function displayStockData(data) {
     setText("ks-cr", fmtNum(cm.currentRatio));
     setText("ks-de", fmtNum(cm.debtToEquity));
 
-    // ── Detailed Fundamentals ──
+
     renderFundamentals(data.annualFundamentals, data.quarterlyFundamentals);
 
-    // ── Analysis Panels ──
+
     generateInsights(data);
     renderDecisionPanel(data);
 }
 
-// ─── Detailed Fundamentals (Tabs) ───
+
 function renderFundamentals(annual, quarterly) {
     const hasAnnual = annual && annual.length > 0;
     const hasQuarterly = quarterly && quarterly.length > 0;
@@ -303,15 +289,13 @@ function metricRow(label, value, highlight = false) {
     return `<div class="${cls}"><span class="fund-metric-label">${label}</span><span class="fund-metric-value">${value}</span></div>`;
 }
 
-// ═══════════════════════════════════════════
-// SMART INSIGHTS ENGINE
-// ═══════════════════════════════════════════
+
 function generateInsights(data) {
     const cm = data.currentMetrics || {};
     const price = data.price;
     const insights = [];
 
-    // 1. 52-Week Range Position  [category: range]
+    // 52-Week range position
     if (price != null && cm.weekHigh52 != null && cm.weekLow52 != null && cm.weekHigh52 !== cm.weekLow52) {
         const range = cm.weekHigh52 - cm.weekLow52;
         const position = ((price - cm.weekLow52) / range) * 100;
@@ -350,7 +334,7 @@ function generateInsights(data) {
         }
     }
 
-    // 2. P/E Ratio Valuation  [category: valuation]
+    // P/E ratio valuation
     if (cm.peRatio != null) {
         const pe = Number(cm.peRatio);
         if (pe > 0 && pe < 15) {
@@ -388,7 +372,7 @@ function generateInsights(data) {
         }
     }
 
-    // 3. Return on Equity  [category: profitability]
+    // Return on equity
     if (cm.roe != null) {
         const roe = Number(cm.roe);
         if (roe >= 20) {
@@ -418,7 +402,7 @@ function generateInsights(data) {
         }
     }
 
-    // 4. Beta / Volatility  [category: volatility]
+    // Beta / volatility
     if (cm.beta != null) {
         const beta = Number(cm.beta);
         if (beta > 1.5) {
@@ -448,7 +432,7 @@ function generateInsights(data) {
         }
     }
 
-    // 5. Net Margin — Business Health  [category: margin]
+    // Net margin
     if (cm.netMargin != null) {
         const nm = Number(cm.netMargin);
         if (nm >= 20) {
@@ -486,7 +470,7 @@ function generateInsights(data) {
         }
     }
 
-    // 6. Debt-to-Equity  [category: leverage]
+    // Debt-to-equity
     if (cm.debtToEquity != null) {
         const de = Number(cm.debtToEquity);
         if (de > 2.0) {
@@ -516,16 +500,15 @@ function generateInsights(data) {
         }
     }
 
-    // ── Sort insights by current horizon mode priority ──
+    // Sort by horizon-mode relevance
     const priorities = HORIZON_INSIGHT_PRIORITY[currentHorizon] || HORIZON_INSIGHT_PRIORITY.short;
     insights.sort((a, b) => {
         const idxA = priorities.indexOf(a.category);
         const idxB = priorities.indexOf(b.category);
-        // Categories not in the priority list go to the end
         return (idxA === -1 ? 99 : idxA) - (idxB === -1 ? 99 : idxB);
     });
 
-    // Render insights (cap at 6)
+
     const section = document.getElementById('insights-section');
     const grid = document.getElementById('insights-grid');
     const badge = document.getElementById('insights-badge');
@@ -555,13 +538,7 @@ function renderInsightCard(ins) {
     `;
 }
 
-// ═══════════════════════════════════════════
-// OVERALL SIGNAL ENGINE
-// ═══════════════════════════════════════════
 
-// ═══════════════════════════════════════════
-// QUICK DECISION PANEL
-// ═══════════════════════════════════════════
 function renderDecisionPanel(data) {
     const cm = data.currentMetrics || {};
     const section = document.getElementById('decision-panel');
@@ -570,7 +547,7 @@ function renderDecisionPanel(data) {
     const strengths = [];
     const risks = [];
 
-    // ── Strengths ──
+
     if (cm.roe != null && Number(cm.roe) >= 15) {
         strengths.push(`Strong return on equity at <strong>${Number(cm.roe).toFixed(1)}%</strong> — efficient use of capital`);
     }
@@ -599,7 +576,7 @@ function renderDecisionPanel(data) {
         }
     }
 
-    // ── Risks ──
+
     if (cm.peRatio != null && Number(cm.peRatio) > 35) {
         risks.push(`High P/E ratio of <strong>${Number(cm.peRatio).toFixed(1)}</strong> — may be overvalued or priced for perfection`);
     }
@@ -631,10 +608,10 @@ function renderDecisionPanel(data) {
         }
     }
 
-    // If we have neither strengths nor risks, hide the panel
+
     if (strengths.length === 0 && risks.length === 0) return;
 
-    // Render
+
     const strengthsList = document.getElementById('strengths-list');
     const risksList = document.getElementById('risks-list');
 
@@ -646,7 +623,7 @@ function renderDecisionPanel(data) {
         ? risks.map(r => `<li>${r}</li>`).join('')
         : '<li>No major risks identified from available data.</li>';
 
-    // Conclusion
+
     const conclusionEl = document.getElementById('decision-conclusion');
     const totalFactors = strengths.length + risks.length;
     const ratio = totalFactors > 0 ? strengths.length / totalFactors : 0.5;
@@ -668,9 +645,7 @@ function renderDecisionPanel(data) {
     section.style.display = 'block';
 }
 
-// ═══════════════════════════════════════════
-// CHART INTELLIGENCE PANEL
-// ═══════════════════════════════════════════
+
 function updateChartIntelligence(points) {
     const section = document.getElementById('chart-intel');
     if (!section || !points || points.length < 2) {
@@ -684,7 +659,7 @@ function updateChartIntelligence(points) {
     const high = Math.max(...prices);
     const low = Math.min(...prices);
 
-    // 1. Trend Direction
+
     const trendVal = document.getElementById('intel-trend-val');
     const trendSub = document.getElementById('intel-trend-sub');
     const changePct = ((last - first) / first) * 100;
@@ -702,7 +677,7 @@ function updateChartIntelligence(points) {
         trendSub.textContent = 'No clear direction';
     }
 
-    // 2. Period Return
+
     const returnVal = document.getElementById('intel-return-val');
     const returnSub = document.getElementById('intel-return-sub');
     const sign = changePct >= 0 ? '+' : '';
@@ -710,7 +685,7 @@ function updateChartIntelligence(points) {
     returnVal.className = `intel-value ${changePct >= 0 ? 'val-green' : 'val-red'}`;
     returnSub.textContent = `${fmt(first)} → ${fmt(last)}`;
 
-    // 3. Price Range
+
     const rangeVal = document.getElementById('intel-range-val');
     const rangeSub = document.getElementById('intel-range-sub');
     rangeVal.textContent = `${fmt(low)} — ${fmt(high)}`;
@@ -718,7 +693,7 @@ function updateChartIntelligence(points) {
     const rangeSpread = ((high - low) / low * 100).toFixed(1);
     rangeSub.textContent = `${rangeSpread}% spread`;
 
-    // 4. Momentum (simple: compare last 20% of points average vs first 20%)
+    // Momentum: compare avg of last 20% vs first 20%
     const momVal = document.getElementById('intel-momentum-val');
     const momSub = document.getElementById('intel-momentum-sub');
     const chunk = Math.max(Math.floor(prices.length * 0.2), 1);
@@ -751,9 +726,7 @@ function updateChartIntelligence(points) {
     section.style.display = 'grid';
 }
 
-// ═══════════════════════════════════════════
-// CHART.JS — AbortController-based requests
-// ═══════════════════════════════════════════
+
 let priceChart;
 function initChart() {
     const ctx = document.getElementById('priceChart').getContext('2d');
@@ -862,13 +835,12 @@ async function fetchAndRenderChart(period = '1M') {
     } catch (err) {
         if (err.name === "AbortError") return;
 
-        console.error("Chart error:", err);
         if (errorEl) {
             errorEl.style.display = "flex";
             document.getElementById("chart-error-msg").textContent = err.message || "Failed to load chart.";
         }
         if (canvas) canvas.style.opacity = "0";
-        // Hide intelligence panel on error
+
         const intel = document.getElementById('chart-intel');
         if (intel) intel.style.display = 'none';
     } finally {
@@ -881,7 +853,7 @@ function applyChartData(points, stale = false) {
     const canvas = document.getElementById("priceChart");
     const errorEl = document.getElementById("chart-error");
 
-    // Hide error if previously shown
+
     if (errorEl) errorEl.style.display = "none";
 
     priceChart.data.labels = points.map(p => p.date);
@@ -889,7 +861,7 @@ function applyChartData(points, stale = false) {
     priceChart.update('none');
     if (canvas) canvas.style.opacity = "1";
 
-    // Show stale-data indicator if serving cached fallback
+
     const titleEl = document.getElementById("chart-title");
     if (titleEl) {
         const baseName = stockDetailsCache?.company?.name || symbol;
@@ -898,33 +870,31 @@ function applyChartData(points, stale = false) {
             : ` ${baseName}`;
     }
 
-    // Update Chart Intelligence panel
+
     updateChartIntelligence(points);
 }
 
-// ─── Chart controls ───
+
 document.querySelectorAll(".chart-controls button").forEach(btn => {
     btn.addEventListener("click", function () {
         const period = this.dataset.period;
 
-        // Skip if same period already active
+
         if (period === activePeriod && !chartAbort) return;
 
-        // Update active button
+
         document.querySelectorAll(".chart-controls button").forEach(b => b.classList.remove("active"));
         this.classList.add("active");
 
-        // Clear activePeriod to force reload
+
         activePeriod = null;
         fetchAndRenderChart(period);
     });
 });
 
-// ═══════════════════════════════════════════
-// WATCHLIST TOGGLE (with JWT auth)
-// ═══════════════════════════════════════════
+
 let inWatchlist = false;
-let watchlistBusy = false; // Prevent rapid double-clicks
+let watchlistBusy = false;
 
 async function initWatchlistButton() {
     const btn = document.getElementById("watchlist-btn");
@@ -932,12 +902,11 @@ async function initWatchlistButton() {
 
     const token = getAuthToken();
     if (!token) {
-        // Guest: show default state, clicking prompts login
         btn.textContent = "☆ Add to Watchlist";
         return;
     }
 
-    // Check if this stock is already in watchlist
+
     try {
         const res = await fetch(`${API_BASE}/watchlist/check/${encodeURIComponent(symbol)}`, {
             headers: getAuthHeaders(),
@@ -948,7 +917,6 @@ async function initWatchlistButton() {
             updateWatchlistButton();
         }
     } catch {
-        // Silently fail — button will show default state
     }
 }
 
@@ -965,11 +933,11 @@ function updateWatchlistButton() {
     }
 }
 
-// Called from the onclick handler on the button
+
 async function toggleWatchlist() {
     const token = getAuthToken();
 
-    // Not logged in — prompt login
+
     if (!token) {
         showToast("🔒 Please log in to use the watchlist.");
         setTimeout(() => {
@@ -978,13 +946,13 @@ async function toggleWatchlist() {
         return;
     }
 
-    // Prevent double-clicks
+
     if (watchlistBusy) return;
     watchlistBusy = true;
 
     try {
         if (inWatchlist) {
-            // Remove from watchlist
+
             const res = await fetch(`${API_BASE}/watchlist/${encodeURIComponent(symbol)}`, {
                 method: "DELETE",
                 headers: getAuthHeaders(),
@@ -998,7 +966,7 @@ async function toggleWatchlist() {
                 showToast(`✗ ${data.message || "Failed to remove."}`);
             }
         } else {
-            // Add to watchlist
+
             const res = await fetch(`${API_BASE}/watchlist`, {
                 method: "POST",
                 headers: {
@@ -1023,7 +991,7 @@ async function toggleWatchlist() {
     }
 }
 
-// ─── Loading / Error / Toast ───
+
 function setLoadingState(loading) {
     const overlay = document.getElementById("loading-overlay");
     if (overlay) overlay.classList.toggle("active", loading);
@@ -1041,14 +1009,9 @@ function showToast(msg) {
     setTimeout(() => toast.classList.remove("show"), 8000);
 }
 
-// ═══════════════════════════════════════════
-// ML PREDICTION
-// ═══════════════════════════════════════════
 
-/**
- * Fetch prediction data from backend and render the prediction section.
- * @param {string} sym - Stock ticker symbol
- */
+
+
 async function loadPrediction(sym) {
     const section = document.getElementById('prediction-section');
     const loader = document.getElementById('prediction-loader');
@@ -1057,7 +1020,7 @@ async function loadPrediction(sym) {
     const noteEl = document.getElementById('prediction-note');
     if (!section) return;
 
-    // Show section with loading shimmer
+
     section.style.display = 'block';
     loader.style.display = 'block';
     grid.style.display = 'none';
@@ -1077,29 +1040,26 @@ async function loadPrediction(sym) {
         }
 
         renderPrediction(data);
-    } catch (err) {
-        console.error('[Prediction] Fetch error:', err);
+    } catch {
+
         loader.style.display = 'none';
         showPredictionError('Could not load prediction. Please try again later.');
     }
 }
 
-/**
- * Render prediction data into the prediction tiles.
- * @param {Object} data - Prediction response from API
- */
+
 function renderPrediction(data) {
     const grid = document.getElementById('prediction-grid');
     const noteEl = document.getElementById('prediction-note');
     if (!grid) return;
 
-    // ── Trend ──
+
     const trendEl = document.getElementById('pred-trend');
     const trendSub = document.getElementById('pred-trend-sub');
     const trendTile = document.getElementById('pred-tile-trend');
     const trend = (data.trend || 'Sideways').toLowerCase();
 
-    // Clear old trend classes
+
     trendTile.classList.remove('trend-bullish', 'trend-bearish', 'trend-sideways');
 
     if (trend === 'bullish') {
@@ -1119,13 +1079,13 @@ function renderPrediction(data) {
         trendTile.classList.add('trend-sideways');
     }
 
-    // ── Predicted Price ──
+
     const priceEl = document.getElementById('pred-price');
     const priceSub = document.getElementById('pred-price-sub');
     priceEl.textContent = fmt(data.predictedPrice);
     priceEl.className = 'pred-tile-value';
 
-    // Compare with current price if available
+
     if (stockDetailsCache && stockDetailsCache.price != null) {
         const curr = stockDetailsCache.price;
         const diff = data.predictedPrice - curr;
@@ -1138,7 +1098,7 @@ function renderPrediction(data) {
         priceSub.textContent = isLong ? '30-day outlook' : 'Next-day estimate';
     }
 
-    // ── Expected Range ──
+
     const rangeEl = document.getElementById('pred-range');
     const rangeSub = document.getElementById('pred-range-sub');
     if (data.predictedRange) {
@@ -1150,13 +1110,13 @@ function renderPrediction(data) {
         rangeSub.textContent = '';
     }
 
-    // ── Confidence ──
+
     const confEl = document.getElementById('pred-confidence');
     const confFill = document.getElementById('pred-confidence-fill');
     const conf = data.confidence || 0;
     confEl.textContent = `${conf}%`;
 
-    // Color-code confidence
+
     let confClass;
     if (conf >= 65) {
         confEl.className = 'pred-tile-value val-green';
@@ -1170,16 +1130,16 @@ function renderPrediction(data) {
     }
 
     confFill.className = `pred-confidence-fill ${confClass}`;
-    // Animate the bar after a short delay for visual effect
+
     requestAnimationFrame(() => {
         confFill.style.width = `${conf}%`;
     });
 
-    // Show grid and note
+
     grid.style.display = 'grid';
     noteEl.style.display = 'block';
 
-    // Update note text based on mode
+
     if (data.explanation) {
         noteEl.textContent = `${data.explanation} This is not financial advice.`;
     } else {
@@ -1189,17 +1149,14 @@ function renderPrediction(data) {
             : 'Based on short-term moving averages, momentum, and trend estimation. This is not financial advice.';
     }
 
-    // Update prediction badge to show mode
+
     const badgeEl = document.getElementById('prediction-badge');
     if (badgeEl) {
         badgeEl.textContent = data.mode === 'long' ? 'LONG' : 'SHORT';
     }
 }
 
-/**
- * Show prediction error message.
- * @param {string} message
- */
+
 function showPredictionError(message) {
     const errorEl = document.getElementById('prediction-error');
     const msgEl = document.getElementById('prediction-error-msg');
@@ -1212,18 +1169,16 @@ function showPredictionError(message) {
     if (msgEl) msgEl.textContent = message;
 }
 
-// ═══════════════════════════════════════════
-// BOOT
-// ═══════════════════════════════════════════
+
 (async () => {
-    // Initialize horizon toggle first (restores from localStorage)
+
     initHorizonToggle();
     initChart();
     await loadStockDetails();
 
-    // Use stored horizon mode for initial chart period and prediction
+
     const initialPeriod = HORIZON_CHART_PERIOD[currentHorizon] || '1M';
-    // Set the correct chart button as active
+
     document.querySelectorAll('.chart-controls button').forEach(b => {
         b.classList.toggle('active', b.dataset.period === initialPeriod);
     });

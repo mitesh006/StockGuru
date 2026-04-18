@@ -1,6 +1,4 @@
-// watchlist.js — Watchlist page with backend integration
-// Fetches user's watchlist from API, displays live prices,
-// supports adding and removing stocks.
+// watchlist.js
 
 const API_BASE = "http://localhost:3000/api";
 
@@ -11,7 +9,8 @@ let watchlistInitialized = false;
 let loadingWatchlist = false;
 let addStockInProgress = false;
 
-// ─── Token/Auth Helpers ─────────────────────────────────────────────
+
+
 function getToken() {
     return localStorage.getItem("token");
 }
@@ -45,7 +44,7 @@ function handleUnauthorized() {
     }, 1500);
 }
 
-// ─── Startup ────────────────────────────────────────────────────────
+
 function checkAuthAndInit() {
     const token = getToken();
 
@@ -81,7 +80,7 @@ async function initWatchlist() {
     await loadWatchlist();
 }
 
-// Reload fresh data when page is shown again after login/navigation
+// Reload fresh data when shown again after login/navigation
 window.addEventListener("pageshow", () => {
     const token = getToken();
 
@@ -96,9 +95,7 @@ window.addEventListener("pageshow", () => {
 
 checkAuthAndInit();
 
-// ════════════════════════════════════════════════════════════════════
-// LOAD WATCHLIST FROM BACKEND
-// ════════════════════════════════════════════════════════════════════
+
 async function loadWatchlist() {
     if (loadingWatchlist) return;
 
@@ -139,7 +136,7 @@ async function loadWatchlist() {
         }
 
         const data = await res.json();
-        console.log("Watchlist GET response:", data);
+
 
         if (!data.success) {
             showWatchlistToast(data.message || "Failed to load watchlist.");
@@ -163,8 +160,8 @@ async function loadWatchlist() {
 
         if (tableContainer) tableContainer.style.display = "block";
         if (emptyState) emptyState.style.display = "none";
-    } catch (err) {
-        console.error("Watchlist load error:", err);
+    } catch {
+
         showWatchlistToast("Could not connect to server.");
 
         if (tbody) tbody.innerHTML = "";
@@ -175,9 +172,7 @@ async function loadWatchlist() {
     }
 }
 
-// ════════════════════════════════════════════════════════════════════
-// RENDER WATCHLIST TABLE
-// ════════════════════════════════════════════════════════════════════
+
 function renderWatchlistTable(stocks) {
     const tbody = document.getElementById("watchlist-tbody");
     if (!tbody) return;
@@ -220,9 +215,7 @@ function renderWatchlistTable(stocks) {
     }).join("");
 }
 
-// ════════════════════════════════════════════════════════════════════
-// ADD STOCK TO WATCHLIST
-// ════════════════════════════════════════════════════════════════════
+
 async function handleAddStock() {
     if (addStockInProgress) return;
 
@@ -278,8 +271,8 @@ async function handleAddStock() {
         } else {
             showWatchlistToast(data.message || "Failed to add stock.");
         }
-    } catch (err) {
-        console.error("Add stock error:", err);
+    } catch {
+
         showWatchlistToast("Could not connect to server.");
     } finally {
         addStockInProgress = false;
@@ -291,9 +284,7 @@ async function handleAddStock() {
     }
 }
 
-// ════════════════════════════════════════════════════════════════════
-// REMOVE STOCK FROM WATCHLIST
-// ════════════════════════════════════════════════════════════════════
+
 async function handleRemoveStock(sym) {
     const token = getToken();
     if (!token) {
@@ -339,15 +330,13 @@ async function handleRemoveStock(sym) {
         } else {
             showWatchlistToast(data.message || "Failed to remove stock.");
         }
-    } catch (err) {
-        console.error("Remove stock error:", err);
+    } catch {
+
         showWatchlistToast("Could not connect to server.");
     }
 }
 
-// ════════════════════════════════════════════════════════════════════
-// TOAST
-// ════════════════════════════════════════════════════════════════════
+
 function showWatchlistToast(msg) {
     let toast = document.getElementById("wl-toast");
 
