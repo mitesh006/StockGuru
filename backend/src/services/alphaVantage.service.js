@@ -46,7 +46,7 @@ const getChartData = async (symbol, period = "1M") => {
     const periodDays = { "1W": 7, "1M": 30, "3M": 90, "6M": 180, "1Y": 365, "5Y": 1825 };
     const days = periodDays[period] || 30;
 
-    if (DEV_MODE) {
+    if (NODE_ENV === "development") {
         const mockPoints = generateMockChartData();
         return { success: true, points: sliceByDays(mockPoints, days) };
     }

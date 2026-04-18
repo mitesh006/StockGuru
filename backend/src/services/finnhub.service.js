@@ -30,7 +30,7 @@ const MOCK_METRICS = {
 const getQuote = async (symbol) => {
     const sym = normalize(symbol);
 
-    if (DEV_MODE) return { ...MOCK_QUOTE };
+    if (NODE_ENV === "development") return { ...MOCK_QUOTE };
 
     const cached = cache.get("quote", sym);
     if (cached) return cached.data;
@@ -66,7 +66,7 @@ const getQuote = async (symbol) => {
 const getProfile = async (symbol) => {
     const sym = normalize(symbol);
 
-    if (DEV_MODE) return { ...MOCK_PROFILE, name: sym };
+    if (NODE_ENV === "development") return { ...MOCK_PROFILE, name: sym };
 
     const cached = cache.get("profile", sym);
     if (cached) return cached.data;
@@ -99,7 +99,7 @@ const getProfile = async (symbol) => {
 const getMetrics = async (symbol) => {
     const sym = normalize(symbol);
 
-    if (DEV_MODE) return { ...MOCK_METRICS };
+    if (NODE_ENV === "development") return { ...MOCK_METRICS };
 
     const cached = cache.get("metrics", sym);
     if (cached) return cached.data;
