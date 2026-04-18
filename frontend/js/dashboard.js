@@ -1,14 +1,12 @@
-// dashboard.js — StockGuru Dashboard
-// POLISHED: Improved chart switching, period guards, loading/error/empty
-// states, and duplicate request prevention.
+// dashboard.js
 
 const API_BASE = "http://localhost:3000/api";
 
-// ─── DOM refs ───
+
 const searchInput = document.getElementById("stock-search-input");
 const searchBtn = document.getElementById("search-btn");
 
-// Search dropdown
+
 const dropdownEl = document.createElement("div");
 dropdownEl.className = "search-dropdown";
 dropdownEl.id = "search-dropdown";
@@ -17,19 +15,14 @@ document.getElementById("search-wrapper").appendChild(dropdownEl);
 
 let debounceTimer = null;
 
-// ═══════════════════════════════════════════
-// FETCH GUARD — prevents duplicate API calls
-// from rapid reloads or re-renders
-// ═══════════════════════════════════════════
+// Prevents duplicate API calls from rapid reloads
 const fetchInProgress = {
     ticker: false,
     overview: false,
     trending: false,
 };
 
-// ═══════════════════════════════════════════
-// SEARCH
-// ═══════════════════════════════════════════
+
 searchInput.addEventListener("input", function () {
     clearTimeout(debounceTimer);
     const query = this.value.trim();
@@ -88,11 +81,9 @@ function hideDropdown() {
     dropdownEl.innerHTML = "";
 }
 
-// ═══════════════════════════════════════════
-// TICKER BAR (with fetch guard)
-// ═══════════════════════════════════════════
+
 async function loadTicker() {
-    if (fetchInProgress.ticker) return; // Prevent duplicate calls
+    if (fetchInProgress.ticker) return;
     fetchInProgress.ticker = true;
     try {
         const res = await fetch(`${API_BASE}/stocks/ticker`);
@@ -121,7 +112,7 @@ function renderTicker(stocks) {
             </a>`;
     }).join('<span class="ticker-sep">·</span>');
 
-    // Duplicate for infinite scroll
+
     track.innerHTML = html + html;
 
     requestAnimationFrame(() => {
@@ -133,14 +124,12 @@ function renderTicker(stocks) {
         }
     });
 
-    // Pause on hover
+
     track.addEventListener("mouseenter", () => track.style.animationPlayState = "paused");
     track.addEventListener("mouseleave", () => track.style.animationPlayState = "running");
 }
 
-// ═══════════════════════════════════════════
-// MARKET OVERVIEW (with fetch guard)
-// ═══════════════════════════════════════════
+
 async function loadMarketOverview() {
     if (fetchInProgress.overview) return;
     fetchInProgress.overview = true;
@@ -175,9 +164,7 @@ function renderOverview(indices) {
     }).join("");
 }
 
-// ═══════════════════════════════════════════
-// TRENDING STOCKS (with fetch guard)
-// ═══════════════════════════════════════════
+
 async function loadTrending() {
     if (fetchInProgress.trending) return;
     fetchInProgress.trending = true;
@@ -185,7 +172,7 @@ async function loadTrending() {
         const res = await fetch(`${API_BASE}/stocks/trending`);
         const data = await res.json();
         if (!data.success) {
-            // Handle specific error types from the refactored backend
+
             if (data.errorType === "RATE_LIMIT") {
                 showTrendingError("API limit reached — please wait a moment");
             }
@@ -221,11 +208,7 @@ function renderTrending(stocks) {
     initCardClickListeners();
 }
 
-// ═══════════════════════════════════════════
-// DASHBOARD CHART (with client-side cache)
-// Improved: proper abort on new requests,
-// same-period skip, cleaner state management
-// ═══════════════════════════════════════════
+
 let dashboardChart = null;
 let activeSymbol = null;
 let activePeriod = null;    // Track currently loaded period
@@ -342,7 +325,7 @@ async function loadDashboardChart(symbol, period) {
         // Ignore abort errors — they're intentional
         if (err.name === "AbortError") return;
 
-        console.error("Dashboard chart error:", err);
+
         if (errorEl) {
             errorEl.style.display = "flex";
             document.getElementById("chart-error-msg").textContent = err.message || "Failed to load chart.";
@@ -350,7 +333,7 @@ async function loadDashboardChart(symbol, period) {
         if (canvas) canvas.style.opacity = "0";
     } finally {
         if (loader) loader.style.display = "none";
-        // Clear abort reference only if it's still this controller
+
         if (chartAbort === controller) chartAbort = null;
     }
 }
@@ -359,7 +342,7 @@ function applyChartData(points, stale = false) {
     const canvas = document.getElementById("priceChart");
     const errorEl = document.getElementById("chart-error");
 
-    // Hide error if previously shown
+
     if (errorEl) errorEl.style.display = "none";
 
     dashboardChart.data.labels = points.map(p => p.date);
@@ -367,7 +350,7 @@ function applyChartData(points, stale = false) {
     dashboardChart.update("none");
     if (canvas) canvas.style.opacity = "1";
 
-    // Show stale-data indicator if serving cached data after API failure
+
     const titleEl = document.getElementById("chart-stock-title");
     if (titleEl) {
         const baseName = activeSymbol || "Chart";
@@ -377,11 +360,9 @@ function applyChartData(points, stale = false) {
     }
 }
 
-// ═══════════════════════════════════════════
-// CARD CLICK LISTENERS
-// ═══════════════════════════════════════════
+
 function initCardClickListeners() {
-    // Prevent View link from triggering card click
+
     document.querySelectorAll(".trending-view").forEach(link => {
         link.addEventListener("click", e => e.stopPropagation());
     });
@@ -391,50 +372,46 @@ function initCardClickListeners() {
             const symbol = card.dataset.symbol;
             if (!symbol) return;
 
-            // Highlight active card
+
             document.querySelectorAll(".trending-card").forEach(c => c.classList.remove("active"));
             card.classList.add("active");
 
-            // Update title immediately
+
             document.getElementById("chart-stock-title").textContent = `${symbol} Chart`;
 
-            // Load chart (will skip if same symbol+period)
+
             activeSymbol = null; // Force reload when clicking same card
             loadDashboardChart(symbol);
 
-            // Smooth scroll to chart
+
             document.querySelector(".chart-section").scrollIntoView({ behavior: "smooth", block: "nearest" });
         });
     });
 }
 
-// ═══════════════════════════════════════════
-// CHART PERIOD BUTTONS
-// ═══════════════════════════════════════════
+
 document.querySelectorAll(".chart-controls button").forEach(btn => {
     btn.addEventListener("click", function () {
         const period = this.dataset.period;
 
-        // Skip if same period already active and loaded for the same symbol
+
         if (period === activePeriod && activeSymbol && !chartAbort) return;
 
-        // Update active button state
+
         document.querySelectorAll(".chart-controls button").forEach(b => b.classList.remove("active"));
         this.classList.add("active");
 
         if (activeSymbol) {
-            // Reset title (remove stale indicator)
+
             document.getElementById("chart-stock-title").textContent = `${activeSymbol} Chart`;
-            // Clear activePeriod to force reload
+
             activePeriod = null;
             loadDashboardChart(activeSymbol, period);
         }
     });
 });
 
-// ═══════════════════════════════════════════
-// BOOT
-// ═══════════════════════════════════════════
+
 initDashboardChart();
 loadTicker();
 loadMarketOverview();

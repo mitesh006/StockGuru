@@ -5,7 +5,6 @@ const API_BASE = "http://localhost:3000/api";
 async function loadProfile() {
     const token = localStorage.getItem("token");
 
-    // Not logged in → redirect to login
     if (!token) {
         window.location.href = "login.html";
         return;
@@ -18,7 +17,6 @@ async function loadProfile() {
         const data = await res.json();
 
         if (!data.success) {
-            // Token invalid or expired
             localStorage.removeItem("token");
             localStorage.removeItem("user");
             window.location.href = "login.html";
@@ -26,32 +24,32 @@ async function loadProfile() {
         }
 
         renderProfile(data.user);
-    } catch (err) {
-        console.error("Profile load error:", err);
+    } catch {
+
         document.getElementById("profile-loading").textContent =
             "Failed to load profile. Make sure the server is running.";
     }
 }
 
 function renderProfile(user) {
-    // Hide loading, show card
+
     document.getElementById("profile-loading").style.display = "none";
     document.getElementById("profile-card").style.display = "block";
 
-    // Avatar: first letter of name
+
     document.getElementById("profile-avatar").textContent =
         (user.name || "U").charAt(0).toUpperCase();
 
-    // Header
+
     document.getElementById("profile-name").textContent = user.name;
     document.getElementById("profile-email").textContent = user.email;
 
-    // Detail rows
+
     document.getElementById("pd-name").textContent = user.name;
     document.getElementById("pd-email").textContent = user.email;
     document.getElementById("pd-since").textContent = formatDate(user.createdAt);
 
-    // Logout
+
     document.getElementById("logout-profile-btn").addEventListener("click", () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");

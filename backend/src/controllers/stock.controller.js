@@ -1,33 +1,13 @@
-/**
- * stock.controller.js — Stock detail + chart endpoints
- *
- * WHAT CHANGED (Refactor):
- * - Uses symbolNormalizer for consistent symbol handling
- * - Uses apiErrorHandler for structured error responses
- * - Returns proper HTTP status codes (429, 404, 500)
- * - Adds stale-cache fallback with { stale: true } flag
- * - Finnhub calls are now cached/deduped inside finnhub.service.js
- * - Alpha Vantage calls are now cached/deduped inside alphaVantage.service.js
- *
- * UNCHANGED: Response shape is identical — frontend doesn't need changes.
- */
-
 const stocks = require("../data/stocks.json");
 const { getQuote, getProfile, getMetrics } = require("../services/finnhub.service");
 const { getChartData: fetchChartData } = require("../services/alphaVantage.service");
 const { normalize, isValid } = require("../utils/symbolNormalizer");
 const { classify } = require("../utils/apiErrorHandler");
 
-/**
- * GET /api/stocks/:symbol
- * Fetch stock quote, company profile, and metrics from Finnhub.
- * All three calls are cached + deduplicated inside the service layer.
- */
 const getStockDetails = async (req, res) => {
     try {
         const sym = normalize(req.params.symbol);
 
-        // Basic validation before hitting any API
         if (!isValid(sym)) {
             return res.status(400).json({
                 success: false,
@@ -35,7 +15,6 @@ const getStockDetails = async (req, res) => {
             });
         }
 
-        // Verify symbol exists in our local list
         const stock = stocks.find(s => s.symbol.toUpperCase() === sym);
         if (!stock) {
             return res.status(404).json({
@@ -44,8 +23,6 @@ const getStockDetails = async (req, res) => {
             });
         }
 
-        // Call all three Finnhub APIs in parallel
-        // (each is individually cached + deduplicated in the service layer)
         const [quote, profile, metrics] = await Promise.all([
             getQuote(sym),
             getProfile(sym),
@@ -72,7 +49,6 @@ const getStockDetails = async (req, res) => {
 
         res.json({ success: true, data: result });
     } catch (error) {
-        console.error("Stock details error:", error.message);
         const err = classify(error, "finnhub");
         res.status(err.status).json({
             success: false,
@@ -82,15 +58,10 @@ const getStockDetails = async (req, res) => {
     }
 };
 
-/**
- * GET /api/stocks/:symbol/candles?period=1M
- * Fetch chart data from Alpha Vantage.
- * The service layer caches full datasets and slices by period locally.
- */
 const getChartData = async (req, res) => {
     try {
         const sym = normalize(req.params.symbol);
-        const { period } = req.query; // 1W, 1M, 6M, 1Y
+        const { period } = req.query;
 
         if (!isValid(sym)) {
             return res.status(400).json({
@@ -112,10 +83,9 @@ const getChartData = async (req, res) => {
         res.json({
             success: true,
             points: result.points,
-            stale: result.stale || false, // true when serving stale cache after API failure
+            stale: result.stale || false,
         });
     } catch (error) {
-        console.error("Chart data error:", error.message);
         const err = classify(error, "alphavantage");
         res.status(err.status).json({
             success: false,

@@ -1,8 +1,6 @@
-/* ===================================================================
-   auth.css — Login, Register, Profile, Watch-gate pages
-   =================================================================== */
+/* Auth pages — Login, Register, Profile, Watchlist gate */
 
-/* ── Base Reset for Auth Pages ── */
+/* Base reset */
 .auth-page {
     margin: 0;
     padding: 0;
@@ -10,16 +8,14 @@
     overflow-x: hidden;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   SPLIT-PANEL LAYOUT
-   ═══════════════════════════════════════════════════════════════════ */
+/* Split-panel layout */
 .auth-layout {
     display: grid;
     grid-template-columns: 1fr 1fr;
     min-height: 100vh;
 }
 
-/* ── Left Panel ── */
+/* Left panel */
 .auth-panel-left {
     background: linear-gradient(160deg, var(--bg-secondary) 0%, #0d1520 100%);
     border-right: 1px solid var(--border-color);
@@ -31,7 +27,7 @@
     overflow: hidden;
 }
 
-/* Animated background grid lines */
+/* Background grid */
 .auth-panel-left::before {
     content: '';
     position: absolute;
@@ -114,7 +110,7 @@
     box-shadow: 0 0 8px rgba(0,255,136,0.6);
 }
 
-/* ── Right Panel ── */
+/* Right panel */
 .auth-panel-right {
     display: flex;
     align-items: center;
@@ -124,9 +120,7 @@
     overflow-y: auto;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   AUTH CARD
-   ═══════════════════════════════════════════════════════════════════ */
+/* Auth card */
 .auth-card {
     width: 100%;
     max-width: 420px;
@@ -138,9 +132,7 @@
     to   { opacity: 1; transform: translateY(0); }
 }
 
-.auth-card-header {
-    margin-bottom: 2rem;
-}
+.auth-card-header { margin-bottom: 2rem; }
 
 .auth-title {
     font-size: 1.75rem;
@@ -157,12 +149,8 @@
     letter-spacing: 0.3px;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   FORM ELEMENTS
-   ═══════════════════════════════════════════════════════════════════ */
-.form-group {
-    margin-bottom: 1.3rem;
-}
+/* Form elements */
+.form-group { margin-bottom: 1.3rem; }
 
 .form-label {
     display: block;
@@ -212,7 +200,7 @@
     justify-content: center;
 }
 
-/* CSS-only eye icon (no emoji) */
+/* CSS-only eye icon */
 .eye-icon {
     display: block;
     width: 18px;
@@ -263,7 +251,7 @@
     font-weight: 600;
 }
 
-/* Form options row */
+/* Form options */
 .form-options {
     display: flex;
     justify-content: space-between;
@@ -318,9 +306,7 @@
 .terms-check a { color: var(--accent-blue); text-decoration: none; }
 .terms-check a:hover { color: var(--accent-green); }
 
-/* ═══════════════════════════════════════════════════════════════════
-   BUTTONS
-   ═══════════════════════════════════════════════════════════════════ */
+/* Auth buttons */
 .btn-auth {
     width: 100%;
     padding: 0.95rem;
@@ -347,7 +333,7 @@
 .btn-auth:active  { transform: translateY(0); }
 .btn-auth:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 
-/* Continue as Guest */
+/* Guest button */
 .btn-guest {
     display: block;
     width: 100%;
@@ -373,9 +359,7 @@
     background: rgba(255,255,255,0.03);
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   DIVIDER & SWITCH
-   ═══════════════════════════════════════════════════════════════════ */
+/* Divider & switch */
 .auth-divider {
     display: flex;
     align-items: center;
@@ -408,9 +392,7 @@
 }
 .auth-switch a:hover { color: var(--accent-blue); }
 
-/* ═══════════════════════════════════════════════════════════════════
-   ALERT MESSAGES
-   ═══════════════════════════════════════════════════════════════════ */
+/* Alert messages */
 .error-msg {
     background: rgba(255, 51, 102, 0.08);
     border: 1px solid rgba(255, 51, 102, 0.4);
@@ -437,9 +419,7 @@
     line-height: 1.5;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   PROFILE PAGE
-   ═══════════════════════════════════════════════════════════════════ */
+/* Profile page */
 .profile-wrapper {
     max-width: 580px;
     margin: 4rem auto;
@@ -532,9 +512,7 @@
     text-transform: uppercase;
 }
 
-.profile-details {
-    padding: 0.5rem 2.5rem 1rem;
-}
+.profile-details { padding: 0.5rem 2.5rem 1rem; }
 
 .profile-row {
     display: flex;
@@ -581,9 +559,7 @@
     box-shadow: 0 0 12px rgba(255, 51, 102, 0.15);
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   AUTH GATE (Watchlist login wall)
-   ═══════════════════════════════════════════════════════════════════ */
+/* Auth gate (watchlist login wall) */
 .auth-gate {
     min-height: calc(100vh - 60px);
     display: flex;
@@ -704,9 +680,7 @@
     color: var(--text-primary);
 }
 
-.auth-gate-guest {
-    margin-top: 0.8rem;
-}
+.auth-gate-guest { margin-top: 0.8rem; }
 .auth-gate-guest a {
     color: var(--text-dim);
     font-size: 0.82rem;
@@ -716,9 +690,7 @@
 }
 .auth-gate-guest a:hover { color: var(--text-secondary); }
 
-/* ═══════════════════════════════════════════════════════════════════
-   WATCHLIST DEV NOTICE + TOAST
-   ═══════════════════════════════════════════════════════════════════ */
+/* Watchlist toast */
 .watchlist-coming-soon {
     text-align: center;
     color: var(--text-dim);
@@ -748,9 +720,7 @@
 }
 .wl-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* ═══════════════════════════════════════════════════════════════════
-   RESPONSIVE
-   ═══════════════════════════════════════════════════════════════════ */
+/* Responsive */
 @media (max-width: 768px) {
     .auth-layout { grid-template-columns: 1fr; }
     .auth-panel-left { display: none; }
@@ -766,9 +736,7 @@
     .form-options { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   SHARED ANIMATIONS
-   ═══════════════════════════════════════════════════════════════════ */
+/* Shared animations */
 @keyframes glow-pulse {
     0%, 100% { text-shadow: 0 0 10px rgba(0,255,136,0.4); }
     50%       { text-shadow: 0 0 22px rgba(0,255,136,0.7), 0 0 40px rgba(0,255,136,0.2); }
