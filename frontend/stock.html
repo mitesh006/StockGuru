@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
     <link rel="stylesheet" href="css/stock.css">
     <link rel="icon" href="favicon.ico">
 </head>
+
 <body>
     <!-- Navigation -->
     <nav>
@@ -27,6 +29,19 @@
         <div class="spinner"></div>
         <div class="loading-text">Fetching stock data…</div>
     </div>
+    <!-- ═══ INVESTMENT HORIZON TOGGLE ═══ -->
+    <div class="horizon-control" id="horizon-control">
+        <div class="horizon-label">Investment Horizon</div>
+        <div class="horizon-toggle" id="horizon-toggle">
+            <button class="horizon-btn active" data-mode="short" id="horizon-btn-short">
+                <span class="horizon-icon icon-yellow">⚡︎</span> Short-Term
+            </button>
+            <button class="horizon-btn" data-mode="long" id="horizon-btn-long">
+                <span class="horizon-icon icon-blue">⟳</span> Long-Term
+            </button>
+            <div class="horizon-slider" id="horizon-slider"></div>
+        </div>
+    </div>
     <div class="container">
         <!-- ═══ 1. HERO CARD ═══ -->
         <div class="stock-hero" id="stock-hero">
@@ -35,7 +50,7 @@
                     <div class="identity-row">
                         <img class="company-logo" id="company-logo" src="" alt="Logo" style="display:none;">
                         <div>
-                            <h1 id="stock-symbol">—</h1>
+                            <div class="stock-symbol" id="stock-symbol">—</div>
                             <div class="company-name" id="company-name">Loading…</div>
                         </div>
                     </div>
@@ -55,19 +70,6 @@
                     ☆ Add to Watchlist
                 </button>
             </div>
-            <!-- ═══ INVESTMENT HORIZON TOGGLE ═══ -->
-            <div class="horizon-control" id="horizon-control">
-                <div class="horizon-label">Investment Horizon</div>
-                <div class="horizon-toggle" id="horizon-toggle">
-                    <button class="horizon-btn active" data-mode="short" id="horizon-btn-short">
-                        <span class="horizon-icon">⚡</span> Short-Term
-                    </button>
-                    <button class="horizon-btn" data-mode="long" id="horizon-btn-long">
-                        <span class="horizon-icon">◆</span> Long-Term
-                    </button>
-                    <div class="horizon-slider" id="horizon-slider"></div>
-                </div>
-            </div>
         </div>
         <!-- ═══ 2. CHART SECTION (PREMIUM) ═══ -->
         <div class="chart-section" id="chart-section">
@@ -84,7 +86,7 @@
             <div class="chart-area" id="stock-chart">
                 <!-- Canvas for Chart.js -->
                 <canvas id="priceChart"></canvas>
-                
+
                 <!-- Fallback/Loading states -->
                 <div class="chart-loader" id="chart-loader" style="display: none;">
                     <div class="spinner-small"></div>
@@ -93,6 +95,29 @@
                 <div class="chart-error" id="chart-error" style="display: none;">
                     <div class="error-icon">!</div>
                     <div id="chart-error-msg">No data available for this period.</div>
+                </div>
+            </div>
+            <!-- ═══ 3. COMPACT STATS ROW ═══ -->
+            <div class="stats-row" id="stats-row">
+                <div class="stat-card-compact">
+                    <span class="stat-label">Open</span>
+                    <span class="stat-value" id="stat-open">—</span>
+                </div>
+                <div class="stat-card-compact">
+                    <span class="stat-label">High</span>
+                    <span class="stat-value green" id="stat-high">—</span>
+                </div>
+                <div class="stat-card-compact">
+                    <span class="stat-label">Low</span>
+                    <span class="stat-value red" id="stat-low">—</span>
+                </div>
+                <div class="stat-card-compact">
+                    <span class="stat-label">Prev Close</span>
+                    <span class="stat-value" id="stat-close">—</span>
+                </div>
+                <div class="stat-card-compact">
+                    <span class="stat-label">Volume</span>
+                    <span class="stat-value" id="stat-volume">—</span>
                 </div>
             </div>
             <!-- ═══ 2b. CHART INTELLIGENCE PANEL ═══ -->
@@ -119,73 +144,10 @@
                 </div>
             </div>
         </div>
-        <!-- ═══ 3. COMPACT STATS ROW ═══ -->
-        <div class="stats-row" id="stats-row">
-            <div class="stat-card-compact">
-                <div class="stat-label">Open</div>
-                <div class="stat-value" id="stat-open">—</div>
-            </div>
-            <div class="stat-card-compact">
-                <div class="stat-label">High</div>
-                <div class="stat-value green" id="stat-high">—</div>
-            </div>
-            <div class="stat-card-compact">
-                <div class="stat-label">Low</div>
-                <div class="stat-value red" id="stat-low">—</div>
-            </div>
-            <div class="stat-card-compact">
-                <div class="stat-label">Prev Close</div>
-                <div class="stat-value" id="stat-close">—</div>
-            </div>
-            <div class="stat-card-compact">
-                <div class="stat-label">Volume</div>
-                <div class="stat-value" id="stat-volume">—</div>
-            </div>
-        </div>
-        <!-- ═══ 4. KEY STATISTICS ═══ -->
-        <div class="key-stats-section" id="key-stats-section">
-            <div class="section-heading">Key Statistics</div>
-            <div class="key-stats-grid">
-                <div class="key-stats-col">
-                    <div class="ks-row highlight"><span class="ks-label">P/E Ratio</span><span class="ks-value" id="ks-pe">—</span></div>
-                    <div class="ks-row highlight"><span class="ks-label">EPS</span><span class="ks-value" id="ks-eps">—</span></div>
-                    <div class="ks-row highlight"><span class="ks-label">ROE</span><span class="ks-value" id="ks-roe">—</span></div>
-                    <div class="ks-row"><span class="ks-label">ROA</span><span class="ks-value" id="ks-roa">—</span></div>
-                    <div class="ks-row"><span class="ks-label">Net Margin</span><span class="ks-value" id="ks-nm">—</span></div>
-                    <div class="ks-row"><span class="ks-label">Op. Margin</span><span class="ks-value" id="ks-om">—</span></div>
-                    <div class="ks-row"><span class="ks-label">Book Value</span><span class="ks-value" id="ks-bv">—</span></div>
-                </div>
-                <div class="key-stats-col">
-                    <div class="ks-row"><span class="ks-label">Market Cap</span><span class="ks-value" id="ks-mcap">—</span></div>
-                    <div class="ks-row"><span class="ks-label">Beta</span><span class="ks-value" id="ks-beta">—</span></div>
-                    <div class="ks-row"><span class="ks-label">52W High</span><span class="ks-value green" id="ks-52h">—</span></div>
-                    <div class="ks-row"><span class="ks-label">52W Low</span><span class="ks-value red" id="ks-52l">—</span></div>
-                    <div class="ks-row"><span class="ks-label">Current Ratio</span><span class="ks-value" id="ks-cr">—</span></div>
-                    <div class="ks-row"><span class="ks-label">Debt/Equity</span><span class="ks-value" id="ks-de">—</span></div>
-                </div>
-            </div>
-        </div>
         <!-- ═══ 5. OVERALL SIGNAL BANNER ═══ -->
-        <div class="overall-signal" id="overall-signal" style="display:none;">
-            <div class="signal-main">
-                <div class="signal-icon-lg" id="signal-icon-lg">◆</div>
-                <div class="signal-content">
-                    <div class="signal-headline" id="signal-headline">Overall Signal</div>
-                    <div class="signal-verdict" id="signal-verdict">Analyzing…</div>
-                </div>
-                <div class="signal-confidence" id="signal-confidence">
-                    <div class="confidence-label">Confidence</div>
-                    <div class="confidence-bar">
-                        <div class="confidence-fill" id="confidence-fill"></div>
-                    </div>
-                    <div class="confidence-pct" id="confidence-pct">—</div>
-                </div>
-            </div>
-        </div>
         <!-- ═══ 6. SMART INSIGHTS ═══ -->
-        <div class="insights-section" id="insights-section" style="display:none;">
-            <div class="section-heading">
-                <span class="section-heading-icon">◆</span> Smart Insights
+        <div class="insights-section" id="insights-section" style>
+            <div class="section-heading">Key Insights
                 <span class="insights-badge" id="insights-badge"></span>
             </div>
             <div class="insights-grid" id="insights-grid">
@@ -194,11 +156,10 @@
         </div>
         <!-- ═══ 7. ML PREDICTION ═══ -->
         <div class="prediction-section" id="prediction-section" style="display:none;">
-            <div class="section-heading">
-                <span class="section-heading-icon">◈</span> ML Price Prediction
-                <span class="prediction-badge" id="prediction-badge">AI</span>
+            <div class="section-heading">Price Forecast
+                <span class="prediction-badge" id="prediction-badge"></span>
             </div>
-
+            
             <!-- Loading state -->
             <div class="prediction-loader" id="prediction-loader" style="display:none;">
                 <div class="pred-shimmer-grid">
@@ -208,13 +169,13 @@
                     <div class="pred-shimmer"></div>
                 </div>
             </div>
-
+            
             <!-- Error state -->
             <div class="prediction-error" id="prediction-error" style="display:none;">
                 <div class="pred-error-icon">!</div>
                 <div class="pred-error-msg" id="prediction-error-msg">Prediction unavailable.</div>
             </div>
-
+            
             <!-- Data tiles -->
             <div class="prediction-grid" id="prediction-grid" style="display:none;">
                 <div class="pred-tile" id="pred-tile-trend">
@@ -245,11 +206,10 @@
                 Based on moving averages, momentum, and trend estimation. This is not financial advice.
             </div>
         </div>
-
+        
         <!-- ═══ 8. QUICK DECISION PANEL ═══ -->
         <div class="decision-panel" id="decision-panel" style="display:none;">
-            <div class="section-heading">
-                <span class="section-heading-icon">▶</span> Quick Decision Summary
+            <div class="section-heading">Quick Decision Summary
             </div>
             <div class="decision-body">
                 <div class="decision-col">
@@ -275,7 +235,43 @@
         </div>
         <!-- ═══ 8. DETAILED FUNDAMENTALS ═══ -->
         <div class="fundamentals-section" id="fundamentals-section">
-            <div class="section-heading">Detailed Fundamentals</div>
+            <div class="section-heading">Fundamentals</div>
+            <!-- ═══ 4. KEY STATISTICS ═══ -->
+            <div class="key-stats-section" id="key-stats-section">
+                <div class="section-heading">Key Statistics</div>
+                <div class="key-stats-grid">
+                    <div class="key-stats-col">
+                        <div class="ks-row highlight"><span class="ks-label">P/E Ratio</span><span class="ks-value"
+                                id="ks-pe">—</span></div>
+                        <div class="ks-row highlight"><span class="ks-label">EPS</span><span class="ks-value"
+                                id="ks-eps">—</span></div>
+                        <div class="ks-row highlight"><span class="ks-label">ROE</span><span class="ks-value"
+                                id="ks-roe">—</span></div>
+                        <div class="ks-row"><span class="ks-label">ROA</span><span class="ks-value" id="ks-roa">—</span>
+                        </div>
+                        <div class="ks-row"><span class="ks-label">Net Margin</span><span class="ks-value"
+                                id="ks-nm">—</span></div>
+                        <div class="ks-row"><span class="ks-label">Op. Margin</span><span class="ks-value"
+                                id="ks-om">—</span></div>
+                        <div class="ks-row"><span class="ks-label">Book Value</span><span class="ks-value"
+                                id="ks-bv">—</span></div>
+                    </div>
+                    <div class="key-stats-col">
+                        <div class="ks-row"><span class="ks-label">Market Cap</span><span class="ks-value"
+                                id="ks-mcap">—</span></div>
+                        <div class="ks-row"><span class="ks-label">Beta</span><span class="ks-value" id="ks-beta">—</span>
+                        </div>
+                        <div class="ks-row"><span class="ks-label">52W High</span><span class="ks-value green"
+                                id="ks-52h">—</span></div>
+                        <div class="ks-row"><span class="ks-label">52W Low</span><span class="ks-value red"
+                                id="ks-52l">—</span></div>
+                        <div class="ks-row"><span class="ks-label">Current Ratio</span><span class="ks-value"
+                                id="ks-cr">—</span></div>
+                        <div class="ks-row"><span class="ks-label">Debt/Equity</span><span class="ks-value"
+                                id="ks-de">—</span></div>
+                    </div>
+                </div>
+            </div>
             <div class="fund-tabs" id="fund-tabs">
                 <button class="fund-tab active" data-tab="annual">Yearly</button>
                 <button class="fund-tab" data-tab="quarterly">Quarterly</button>
@@ -297,4 +293,5 @@
     <script src="js/nav.js"></script>
     <script src="js/stock.js"></script>
 </body>
+
 </html>

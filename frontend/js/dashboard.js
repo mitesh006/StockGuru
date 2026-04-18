@@ -6,7 +6,7 @@ const API_BASE = "http://localhost:3000/api";
 
 // ─── DOM refs ───
 const searchInput = document.getElementById("stock-search-input");
-const searchBtn   = document.getElementById("search-btn");
+const searchBtn = document.getElementById("search-btn");
 
 // Search dropdown
 const dropdownEl = document.createElement("div");
@@ -22,7 +22,7 @@ let debounceTimer = null;
 // from rapid reloads or re-renders
 // ═══════════════════════════════════════════
 const fetchInProgress = {
-    ticker:   false,
+    ticker: false,
     overview: false,
     trending: false,
 };
@@ -57,7 +57,7 @@ async function fetchSearchResults(query) {
     try {
         dropdownEl.innerHTML = `<div class="dropdown-loading">Searching…</div>`;
         dropdownEl.classList.add("visible");
-        const res  = await fetch(`${API_BASE}/stocks/search?query=${encodeURIComponent(query)}`);
+        const res = await fetch(`${API_BASE}/stocks/search?query=${encodeURIComponent(query)}`);
         const data = await res.json();
         if (!data.success || !data.data?.length) {
             dropdownEl.innerHTML = `<div class="dropdown-empty">No results for "${query}"</div>`;
@@ -95,7 +95,7 @@ async function loadTicker() {
     if (fetchInProgress.ticker) return; // Prevent duplicate calls
     fetchInProgress.ticker = true;
     try {
-        const res  = await fetch(`${API_BASE}/stocks/ticker`);
+        const res = await fetch(`${API_BASE}/stocks/ticker`);
         const data = await res.json();
         if (!data.success) return;
         renderTicker(data.data);
@@ -110,7 +110,7 @@ async function loadTicker() {
 function renderTicker(stocks) {
     const track = document.getElementById("ticker-track");
     const html = stocks.map(s => {
-        const up  = s.changePercent >= 0;
+        const up = s.changePercent >= 0;
         const cls = up ? "pos" : "neg";
         const arrow = up ? "▲" : "▼";
         return `
@@ -145,7 +145,7 @@ async function loadMarketOverview() {
     if (fetchInProgress.overview) return;
     fetchInProgress.overview = true;
     try {
-        const res  = await fetch(`${API_BASE}/stocks/overview`);
+        const res = await fetch(`${API_BASE}/stocks/overview`);
         const data = await res.json();
         if (!data.success) return;
         renderOverview(data.data);
@@ -162,7 +162,7 @@ async function loadMarketOverview() {
 function renderOverview(indices) {
     const grid = document.getElementById("overview-grid");
     grid.innerHTML = indices.map(idx => {
-        const up  = idx.changePercent >= 0;
+        const up = idx.changePercent >= 0;
         const cls = up ? "pos" : "neg";
         const arrow = up ? "▲" : "▼";
         return `
@@ -182,7 +182,7 @@ async function loadTrending() {
     if (fetchInProgress.trending) return;
     fetchInProgress.trending = true;
     try {
-        const res  = await fetch(`${API_BASE}/stocks/trending`);
+        const res = await fetch(`${API_BASE}/stocks/trending`);
         const data = await res.json();
         if (!data.success) {
             // Handle specific error types from the refactored backend
@@ -207,7 +207,7 @@ function showTrendingError(msg) {
 function renderTrending(stocks) {
     const grid = document.getElementById("trending-grid");
     grid.innerHTML = stocks.map(s => {
-        const up  = s.changePercent >= 0;
+        const up = s.changePercent >= 0;
         const cls = up ? "pos" : "neg";
         const arrow = up ? "▲" : "▼";
         return `
@@ -227,10 +227,10 @@ function renderTrending(stocks) {
 // same-period skip, cleaner state management
 // ═══════════════════════════════════════════
 let dashboardChart = null;
-let activeSymbol   = null;
-let activePeriod   = null;    // Track currently loaded period
-let chartAbort     = null;    // AbortController for in-flight chart fetch
-const chartCache   = new Map(); // key: "SYMBOL|PERIOD" → { points, stale, ts }
+let activeSymbol = null;
+let activePeriod = null;    // Track currently loaded period
+let chartAbort = null;    // AbortController for in-flight chart fetch
+const chartCache = new Map(); // key: "SYMBOL|PERIOD" → { points, stale, ts }
 const CHART_CACHE_TTL = 5 * 60 * 1000; // 5 min
 
 function initDashboardChart() {
@@ -240,14 +240,16 @@ function initDashboardChart() {
     gradient.addColorStop(1, "rgba(0, 255, 136, 0)");
     dashboardChart = new Chart(ctx, {
         type: "line",
-        data: { labels: [], datasets: [{
-            label: "Price", data: [],
-            borderColor: "#00ff88", borderWidth: 2,
-            pointRadius: 0, pointHoverRadius: 6,
-            pointHoverBackgroundColor: "#00ff88",
-            pointHoverBorderColor: "#fff", pointHoverBorderWidth: 2,
-            fill: true, backgroundColor: gradient, tension: 0.1
-        }]},
+        data: {
+            labels: [], datasets: [{
+                label: "Price", data: [],
+                borderColor: "#00ff88", borderWidth: 2,
+                pointRadius: 0, pointHoverRadius: 6,
+                pointHoverBackgroundColor: "#00ff88",
+                pointHoverBorderColor: "#fff", pointHoverBorderWidth: 2,
+                fill: true, backgroundColor: gradient, tension: 0.1
+            }]
+        },
         options: {
             responsive: true, maintainAspectRatio: false,
             interaction: { intersect: false, mode: "index" },
@@ -289,7 +291,7 @@ async function loadDashboardChart(symbol, period) {
 
     // Check client-side cache first
     const cacheKey = `${symbol}|${period}`;
-    const cached   = chartCache.get(cacheKey);
+    const cached = chartCache.get(cacheKey);
     if (cached && (Date.now() - cached.ts) < CHART_CACHE_TTL) {
         activeSymbol = symbol;
         activePeriod = period;
@@ -303,22 +305,22 @@ async function loadDashboardChart(symbol, period) {
         chartAbort = null;
     }
 
-    const loader      = document.getElementById("chart-loader");
-    const errorEl     = document.getElementById("chart-error");
-    const canvas      = document.getElementById("priceChart");
+    const loader = document.getElementById("chart-loader");
+    const errorEl = document.getElementById("chart-error");
+    const canvas = document.getElementById("priceChart");
     const placeholder = document.getElementById("chart-placeholder-inner");
 
     // Show loading state immediately
     if (placeholder) placeholder.style.display = "none";
-    if (loader)      loader.style.display = "flex";
-    if (errorEl)     errorEl.style.display = "none";
-    if (canvas)      canvas.style.opacity  = "0.3";
+    if (loader) loader.style.display = "flex";
+    if (errorEl) errorEl.style.display = "none";
+    if (canvas) canvas.style.opacity = "0.3";
 
     const controller = new AbortController();
     chartAbort = controller;
 
     try {
-        const res  = await fetch(
+        const res = await fetch(
             `${API_BASE}/stocks/${encodeURIComponent(symbol)}/candles?period=${period}`,
             { signal: controller.signal }
         );
@@ -360,7 +362,7 @@ function applyChartData(points, stale = false) {
     // Hide error if previously shown
     if (errorEl) errorEl.style.display = "none";
 
-    dashboardChart.data.labels           = points.map(p => p.date);
+    dashboardChart.data.labels = points.map(p => p.date);
     dashboardChart.data.datasets[0].data = points.map(p => p.price);
     dashboardChart.update("none");
     if (canvas) canvas.style.opacity = "1";
