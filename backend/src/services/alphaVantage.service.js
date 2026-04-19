@@ -6,7 +6,7 @@ const { normalize } = require("../utils/symbolNormalizer");
 
 const API_KEY = process.env.ALPHA_VANTAGE_API_KEY;
 const BASE_URL = "https://www.alphavantage.co/query";
-const DEV_MODE = process.env.DEV_MODE === "true";
+const NODE_ENV = process.env.NODE_ENV
 
 // Generate 365 days of random-walk prices for local development
 function generateMockChartData() {

@@ -9,7 +9,14 @@ const predictionRoutes = require("./routes/prediction.routes");
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: [
+    "http://127.0.0.1:5500",
+    "http://localhost:5500",
+    "stock-guru-self.vercel.app"
+  ],
+  credentials: true
+}));
 app.use(express.json());
 
 const connectDB = async () => {

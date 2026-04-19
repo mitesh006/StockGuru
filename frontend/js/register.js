@@ -1,6 +1,6 @@
 // register.js — Connects register form to StockGuru backend auth API
 
-const API_BASE = "https://saint-cardiac-night-ski.trycloudflare.comapi";
+const API_BASE = "https://recorder-bones-lot-shoes.trycloudflare.com/api";
 
 const form = document.getElementById("register-form");
 const errorEl = document.getElementById("error-msg");

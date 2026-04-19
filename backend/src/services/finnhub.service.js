@@ -5,7 +5,7 @@ const { normalize } = require("../utils/symbolNormalizer");
 
 const API_KEY = process.env.FINNHUB_API_KEY;
 const BASE_URL = "https://finnhub.io/api/v1";
-const DEV_MODE = process.env.DEV_MODE === "true";
+const NODE_ENV = process.env.NODE_ENV
 
 // Mock data for local development without API calls
 const MOCK_QUOTE = {
