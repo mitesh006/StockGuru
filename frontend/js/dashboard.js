@@ -1,6 +1,6 @@
 // dashboard.js
 
-const API_BASE = "http://localhost:3000/api";
+const API_BASE = "https://saint-cardiac-night-ski.trycloudflare.com/api";
 
 
 const searchInput = document.getElementById("stock-search-input");

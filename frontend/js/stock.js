@@ -1,6 +1,6 @@
 // stock.js — Stock detail page
 
-const API_BASE = "http://localhost:3000/api";
+const API_BASE = "https://saint-cardiac-night-ski.trycloudflare.comapi";
 const params = new URLSearchParams(window.location.search);
 const symbol = (params.get("symbol") || "AAPL").toUpperCase().trim();
 document.getElementById("stock-symbol").textContent = symbol;

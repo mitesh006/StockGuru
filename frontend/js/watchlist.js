@@ -1,6 +1,6 @@
 // watchlist.js
 
-const API_BASE = "http://localhost:3000/api";
+const API_BASE = "https://saint-cardiac-night-ski.trycloudflare.comapi";
 
 const gate = document.getElementById("auth-gate");
 const content = document.getElementById("watchlist-content");

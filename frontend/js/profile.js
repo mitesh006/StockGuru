@@ -1,6 +1,6 @@
 // profile.js — User profile page logic
 
-const API_BASE = "http://localhost:3000/api";
+const API_BASE = "https://saint-cardiac-night-ski.trycloudflare.comapi";
 
 async function loadProfile() {
     const token = localStorage.getItem("token");
