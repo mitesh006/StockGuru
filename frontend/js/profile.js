@@ -1,6 +1,6 @@
 // profile.js — User profile page logic
 
-const API_BASE = "https://recorder-bones-lot-shoes.trycloudflare.com/api";
+const API_BASE = "https://create-tale-sustainability-assessing.trycloudflare.com/api";
 
 async function loadProfile() {
     const token = localStorage.getItem("token");

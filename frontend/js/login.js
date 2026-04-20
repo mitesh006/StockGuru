@@ -1,6 +1,6 @@
 // login.js — Connects login form to StockGuru backend auth API
 
-const API_BASE = "https://recorder-bones-lot-shoes.trycloudflare.com/api";
+const API_BASE = "https://create-tale-sustainability-assessing.trycloudflare.com/api";
 
 const form = document.getElementById("login-form");
 const errorEl = document.getElementById("error-msg");

@@ -1,6 +1,6 @@
 // watchlist.js
 
-const API_BASE = "https://recorder-bones-lot-shoes.trycloudflare.com/api";
+const API_BASE = "https://create-tale-sustainability-assessing.trycloudflare.com/api";
 
 const gate = document.getElementById("auth-gate");
 const content = document.getElementById("watchlist-content");
