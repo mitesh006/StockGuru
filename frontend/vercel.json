@@ -1,5 +1,12 @@
 {
   "rewrites": [
-    { "source": "/", "destination": "/dashboard.html" }
+    {
+      "source": "/",
+      "destination": "/dashboard.html"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "http://stockguru.ap-south-1.elasticbeanstalk.com/api/:path*"
+    }
   ]
 }

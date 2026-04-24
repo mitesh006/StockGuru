@@ -1,6 +1,6 @@
 // dashboard.js
 
-const API_BASE = "https://stockguru.ap-south-1.elasticbeanstalk.com/api";
+const API_BASE = "/api";
 
 
 const searchInput = document.getElementById("stock-search-input");

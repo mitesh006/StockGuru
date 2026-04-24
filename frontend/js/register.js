@@ -1,6 +1,6 @@
 // register.js — Connects register form to StockGuru backend auth API
 
-const API_BASE = "https://stockguru.ap-south-1.elasticbeanstalk.com/api";
+const API_BASE = "/api";
 
 const form = document.getElementById("register-form");
 const errorEl = document.getElementById("error-msg");
