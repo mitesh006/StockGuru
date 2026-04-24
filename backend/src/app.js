@@ -13,7 +13,7 @@ app.use(cors({
     origin: [
     "http://127.0.0.1:5500",
     "http://localhost:5500",
-    "https://stock-guru-self.vercel.app"
+    "https://stock-guru-rust.vercel.app"
   ],
   credentials: true
 }));
