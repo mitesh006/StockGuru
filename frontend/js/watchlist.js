@@ -1,6 +1,6 @@
 // watchlist.js
 
-const API_BASE = "https://create-tale-sustainability-assessing.trycloudflare.com/api";
+const API_BASE = "http://stockguru.ap-south-1.elasticbeanstalk.com/api";
 
 const gate = document.getElementById("auth-gate");
 const content = document.getElementById("watchlist-content");

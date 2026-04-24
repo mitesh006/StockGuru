@@ -1,6 +1,6 @@
 // dashboard.js
 
-const API_BASE = "https://create-tale-sustainability-assessing.trycloudflare.com/api";
+const API_BASE = "http://stockguru.ap-south-1.elasticbeanstalk.com/api";
 
 
 const searchInput = document.getElementById("stock-search-input");
