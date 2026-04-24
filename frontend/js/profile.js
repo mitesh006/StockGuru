@@ -1,6 +1,6 @@
 // profile.js — User profile page logic
 
-const API_BASE = "http://stockguru.ap-south-1.elasticbeanstalk.com/api";
+const API_BASE = "https://stockguru.ap-south-1.elasticbeanstalk.com/api";
 
 async function loadProfile() {
     const token = localStorage.getItem("token");

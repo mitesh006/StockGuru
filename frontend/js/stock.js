@@ -1,6 +1,6 @@
 // stock.js — Stock detail page
 
-const API_BASE = "http://stockguru.ap-south-1.elasticbeanstalk.com/api";
+const API_BASE = "https://stockguru.ap-south-1.elasticbeanstalk.com/api";
 const params = new URLSearchParams(window.location.search);
 const symbol = (params.get("symbol") || "AAPL").toUpperCase().trim();
 document.getElementById("stock-symbol").textContent = symbol;
