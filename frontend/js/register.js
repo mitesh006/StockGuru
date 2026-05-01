@@ -2,9 +2,9 @@
 
 const API_BASE = "/api";
 
-const form = document.getElementById("register-form");
-const errorEl = document.getElementById("error-msg");
-const successEl = document.getElementById("success-msg");
+const form        = document.getElementById("register-form");
+const errorEl     = document.getElementById("error-msg");
+const successEl   = document.getElementById("success-msg");
 const registerBtn = document.getElementById("register-btn");
 
 // If already logged in, skip to dashboard
@@ -14,14 +14,17 @@ if (localStorage.getItem("token")) {
 
 // Toggle password visibility
 document.getElementById("toggle-pwd").addEventListener("click", function () {
-    const pwd = document.getElementById("password");
+    const pwd  = document.getElementById("password");
     const icon = document.getElementById("eye-icon");
+
     pwd.type = pwd.type === "password" ? "text" : "password";
     if (icon) icon.classList.toggle("hidden", pwd.type === "text");
 });
+
 document.getElementById("toggle-pwd2").addEventListener("click", function () {
-    const pwd = document.getElementById("confirm-password");
+    const pwd  = document.getElementById("confirm-password");
     const icon = document.getElementById("eye-icon2");
+
     pwd.type = pwd.type === "password" ? "text" : "password";
     if (icon) icon.classList.toggle("hidden", pwd.type === "text");
 });
@@ -32,6 +35,13 @@ function showError(msg) {
     errorEl.style.display = "block";
     successEl.style.display = "none";
 }
+
+function showSuccess(msg) {
+    successEl.textContent = msg;
+    successEl.style.display = "block";
+    errorEl.style.display = "none";
+}
+
 function hideMessages() {
     errorEl.style.display = "none";
     successEl.style.display = "none";
@@ -42,7 +52,9 @@ document.getElementById("password").addEventListener("input", function () {
     const val = this.value;
     const bar = document.getElementById("strength-bar");
     const txt = document.getElementById("strength-text");
+
     let strength = 0;
+
     if (val.length >= 6) strength++;
     if (val.length >= 10) strength++;
     if (/[A-Z]/.test(val)) strength++;
@@ -51,8 +63,10 @@ document.getElementById("password").addEventListener("input", function () {
 
     const labels = ["", "Very Weak", "Weak", "Fair", "Strong", "Very Strong"];
     const colors = ["", "#ff3366", "#ff9900", "#ffd700", "#00cc6a", "#00ff88"];
+
     bar.style.width = `${strength * 20}%`;
     bar.style.background = colors[strength];
+
     txt.textContent = val ? labels[strength] : "";
     txt.style.color = colors[strength];
 });
@@ -61,13 +75,14 @@ form.addEventListener("submit", async function (e) {
     e.preventDefault();
     hideMessages();
 
-    const name = document.getElementById("fullname").value.trim();
-    const email = document.getElementById("email").value.trim();
+    const name     = document.getElementById("fullname").value.trim();
+    const email    = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
-    const confirm = document.getElementById("confirm-password").value;
+    const confirm  = document.getElementById("confirm-password").value;
 
     // Frontend validation
     if (!name) return showError("Full name is required.");
+    if (!email) return showError("Email is required.");
     if (password.length < 6) return showError("Password must be at least 6 characters.");
     if (password !== confirm) return showError("Passwords do not match.");
 
@@ -80,20 +95,27 @@ form.addEventListener("submit", async function (e) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name, email, password }),
         });
+
         const data = await res.json();
 
-        if (!data.success) {
+        if (!res.ok || !data.success) {
             showError(data.message || "Registration failed.");
             return;
         }
 
-        successEl.textContent = "Account created successfully. Redirecting to login...";
-        successEl.style.display = "block";
+        showSuccess(
+            "Account created successfully. Please check your email to verify your account before logging in."
+        );
 
-        setTimeout(() => { window.location.href = "login.html"; }, 2000);
+        // Do NOT save token here.
+        // User must verify email first, then login.
+
+        setTimeout(() => {
+            window.location.href = "login.html";
+        }, 3500);
 
     } catch (err) {
-        showError("Cannot connect to server. Make sure the backend is running.");
+        showError("Cannot connect to server. Please try again later.");
     } finally {
         registerBtn.textContent = "Create Account";
         registerBtn.disabled = false;
