@@ -18,7 +18,7 @@ function extractClose(candle) {
 
 function runPythonPredict(prices, mode) {
     return new Promise((resolve, reject) => {
-        const py = spawn("python", [PYTHON_SCRIPT], {
+        const py = spawn("python3", [PYTHON_SCRIPT], {
             stdio: ["pipe", "pipe", "pipe"],
         });
 
