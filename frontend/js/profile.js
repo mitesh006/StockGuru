@@ -1,6 +1,6 @@
 // profile.js — User profile page logic
 
-const API_BASE = "/api";
+const API_BASE = "http://localhost:8000/api";
 
 async function loadProfile() {
     const token = localStorage.getItem("token");

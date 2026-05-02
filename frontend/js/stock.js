@@ -1,6 +1,6 @@
 // stock.js — Stock detail page
 
-const API_BASE = "/api";
+const API_BASE = "http://localhost:8000/api";
 const params = new URLSearchParams(window.location.search);
 const symbol = (params.get("symbol") || "AAPL").toUpperCase().trim();
 document.getElementById("stock-symbol").textContent = symbol;

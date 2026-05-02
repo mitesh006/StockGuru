@@ -1,6 +1,6 @@
 // register.js — Connects register form to StockGuru backend auth API
 
-const API_BASE = "/api";
+const API_BASE = "http://localhost:8000/api";
 
 const form        = document.getElementById("register-form");
 const errorEl     = document.getElementById("error-msg");
