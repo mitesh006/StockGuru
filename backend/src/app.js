@@ -19,17 +19,36 @@ app.use(cors({
 }));
 app.use(express.json());
 
-const connectDB = async () => {
-    try {
-        await mongoose.connect(process.env.MONGODB_URI);
-        console.log("MongoDB connected successfully.");
-    } catch (err) {
-        console.error("MongoDB connection failed:", err.message);
-    }
+// Lazy cached connection — safe for serverless (Vercel) and traditional servers.
+// Reuses an existing connection across warm invocations; reconnects only on cold start.
+let _dbPromise = null;
+const connectDB = () => {
+    if (mongoose.connection.readyState >= 1) return Promise.resolve();
+    if (_dbPromise) return _dbPromise;
+    _dbPromise = mongoose
+        .connect(process.env.MONGODB_URI)
+        .then(() => console.log("MongoDB connected successfully."))
+        .catch((err) => {
+            console.error("MongoDB connection failed:", err.message);
+            _dbPromise = null;   // allow retry on next request
+            throw err;
+        });
+    return _dbPromise;
 };
-connectDB();
 
-app.get("/", (req, res) => res.send("StockGuru API is running..."));
+// Middleware: ensure DB is connected before handling any request
+app.use(async (_req, _res, next) => {
+    try {
+        await connectDB();
+        next();
+    } catch {
+        next(); // allow the request to proceed; controllers will fail gracefully
+    }
+});
+
+app.get("/", (req, res) => {
+    return res.send("StockGuru API is running...")
+});
 app.use("/api/auth",      authRoutes);
 app.use("/api/stocks",    predictionRoutes);  // before stockRoutes (/:symbol catch-all)
 app.use("/api/stocks",    stockRoutes);

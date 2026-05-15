@@ -1,6 +1,8 @@
 {
+  "name": "stockguru-backend",
   "scripts": {
-  "start": "node server.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "dependencies": {
     "axios": "^1.13.6",
