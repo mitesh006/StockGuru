@@ -6,7 +6,7 @@
     },
     {
       "source": "/api/:path*",
-      "destination": "http://stockguru.ap-south-1.elasticbeanstalk.com/api/:path*"
+      "destination": "https://stock-guru-jiur.vercel.app/api/:path*"
     }
   ]
 }
